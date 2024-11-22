@@ -35,15 +35,15 @@ const eye_slash = () => {
       </div>
       <form>
         <div class="control">
-          <input type="email" placeholder="Email" v-model="email" />
+          <input type="email" placeholder="School email" v-model="email" />
         </div>
 
         <div class="control">
-          <input type="text" placeholder="Nickname" v-model="matno" />
+          <input type="text" placeholder="Matric number" v-model="matno" />
         </div>
 
         <div class="control">
-          <input type="text" placeholder="SPE ID" v-model="email" />
+          <input type="number" placeholder="Level" v-model="level" />
         </div>
 
         <div class="control password">

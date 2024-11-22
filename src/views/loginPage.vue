@@ -36,7 +36,7 @@ const eye_slash = () => {
       </div>
       <form>
         <div class="control">
-          <input type="email" placeholder="Email" v-model="email" />
+          <input type="email" placeholder="School email" v-model="email" />
         </div>
 
         <div class="control password">
