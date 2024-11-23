@@ -4,6 +4,7 @@ import registerPage from '../views/registerPage.vue'
 import loginPage from '../views/loginPage.vue'
 import ResetPassword from '@/views/resetPassword.vue'
 import ForgotPassword from '@/views/forgotPassword.vue'
+import VerifyAccount from '@/views/verifyAccount.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,7 +33,12 @@ const router = createRouter({
       path: '/reset-password',
       name: 'Reset-Password',
       component: ResetPassword
-    }
+    },
+    {
+      path: '/verify-account',
+      name: 'Verify-Account',
+      component: VerifyAccount
+    },
   ]
 })
 
