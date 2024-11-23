@@ -1,5 +1,6 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue'
+import axios from 'axios';
 import { ref } from 'vue'
 
 // const eyeSlash = document.getElementById('eyeSlash')
@@ -17,6 +18,25 @@ const eye_slash = () => {
     inputType.value = 'password'
   }
 }
+
+const formData = ref({
+  email:"",
+  matno:"",
+  level:"",
+  password:"",
+})
+
+
+
+const submitForm =async ()=>{
+try {
+  const response = await axios.post("http://localhost:5000/api/auth/signup", formData.value)
+  console.log(response.data);
+  
+} catch (error) {
+  console.log(`Errro: ${error}`);
+}
+}
 </script>
 
 <template>
@@ -33,21 +53,21 @@ const eye_slash = () => {
         <h1>Welcome!</h1>
         <p>Register as a voter on the voting platform to vote in your preferred candidate.</p>
       </div>
-      <form>
+      <form @submit.prevent="submitForm">
         <div class="control">
-          <input type="email" placeholder="School email" v-model="email" />
+          <input type="email" placeholder="School email" v-model="formData.email" />
         </div>
 
         <div class="control">
-          <input type="text" placeholder="Matric number" v-model="matno" />
+          <input type="text" placeholder="Matric number" v-model="formData.matno" />
         </div>
 
         <div class="control">
-          <input type="number" placeholder="Level" v-model="level" />
+          <input type="number" placeholder="Level" v-model="formData.level" />
         </div>
 
         <div class="control password">
-          <input :type="inputType" placeholder="Password" v-model="password" />
+          <input :type="inputType" placeholder="Password" v-model="formData.password" />
           <i :class="eyeIcon" id="eyeSlash" @click="eye_slash"></i>
         </div>
 

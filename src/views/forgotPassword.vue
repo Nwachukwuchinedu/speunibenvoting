@@ -1,22 +1,7 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue'
-import { ref } from 'vue';
 
-// const eyeSlash = document.getElementById('eyeSlash')
-const eyeIcon =  ref('fa-solid fa-eye-slash');
-const inputType = ref('password');
 
-//eye open and close in password
-const eye_slash = () => {
-    console.log('ok');
-  if (eyeIcon.value === 'fa-solid fa-eye-slash') {
-    eyeIcon.value = 'fa-solid fa-eye'
-    inputType.value = 'text'
-  } else if (eyeIcon.value === 'fa-solid fa-eye') {
-    eyeIcon.value = 'fa-solid fa-eye-slash'
-    inputType.value = 'password'
-  }
-}
 
 </script>
 
