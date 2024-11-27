@@ -72,17 +72,17 @@ const capitalizeFirstLetter = (str) => {
             <div>
               <img src="../img/spelogo.jpeg" alt="" />
               <h3>John Doe</h3>
-              <button>Vote</button>
+              <input type="checkbox" name="" id="">
             </div>
             <div>
               <img src="../img/spelogo.jpeg" alt="" />
               <h3>John Doe</h3>
-              <button>Vote</button>
+              <input type="checkbox" name="" id="">
             </div>
             <div>
               <img src="../img/spelogo.jpeg" alt="" />
               <h3>John Doe</h3>
-              <button>Vote</button>
+              <input type="checkbox" name="" id="">
             </div>
           </div>
         </div>
@@ -93,17 +93,17 @@ const capitalizeFirstLetter = (str) => {
             <div>
               <img src="../img/spelogo.jpeg" alt="" />
               <h3>John Doe</h3>
-              <button>Vote</button>
+              <input type="checkbox" name="" id="">
             </div>
             <div>
               <img src="../img/spelogo.jpeg" alt="" />
               <h3>John Doe</h3>
-              <button>Vote</button>
+              <input type="checkbox" name="" id="">
             </div>
             <div>
               <img src="../img/spelogo.jpeg" alt="" />
               <h3>John Doe</h3>
-              <button>Vote</button>
+              <input type="checkbox" name="" id="">
             </div>
           </div>
         </div>
@@ -114,17 +114,17 @@ const capitalizeFirstLetter = (str) => {
             <div>
               <img src="../img/spelogo.jpeg" alt="" />
               <h3>John Doe</h3>
-              <button>Vote</button>
+              <input type="checkbox" name="" id="">
             </div>
             <div>
               <img src="../img/spelogo.jpeg" alt="" />
               <h3>John Doe</h3>
-              <button>Vote</button>
+              <input type="checkbox" name="" id="">
             </div>
             <div>
               <img src="../img/spelogo.jpeg" alt="" />
               <h3>John Doe</h3>
-              <button>Vote</button>
+              <input type="checkbox" name="" id="">
             </div>
           </div>
         </div>
@@ -242,7 +242,7 @@ const capitalizeFirstLetter = (str) => {
   justify-content: center;
 }
 
-.candidates .card .inner div button {
+.candidates .card .inner div input {
   background: var(--blue);
   color: #fff;
   padding: 10px;
