@@ -1,14 +1,17 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue'
-import { ref } from 'vue';
+import axios from 'axios'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-// const eyeSlash = document.getElementById('eyeSlash')
-const eyeIcon =  ref('fa-solid fa-eye-slash');
-const inputType = ref('password');
+const router = useRouter()
+
+const eyeIcon = ref('fa-solid fa-eye-slash')
+const inputType = ref('password')
 
 //eye open and close in password
 const eye_slash = () => {
-    console.log('ok');
+  console.log('ok')
   if (eyeIcon.value === 'fa-solid fa-eye-slash') {
     eyeIcon.value = 'fa-solid fa-eye'
     inputType.value = 'text'
@@ -18,6 +21,21 @@ const eye_slash = () => {
   }
 }
 
+const formData = ref({
+  email: '',
+  password: ''
+})
+
+const submitForm = async () => {
+  try {
+    const response = await axios.post('http://localhost:5000/api/auth/login', formData.value)
+    const token = response.data.token
+    localStorage.setItem('token', token)
+    router.push('/dashboard')
+  } catch (error) {
+    console.log(`Errro: ${error}`)
+  }
+}
 </script>
 
 <template>
@@ -34,18 +52,20 @@ const eye_slash = () => {
         <h1>Welcome!</h1>
         <p>Register as a voter on the voting platform to vote in your preferred candidate.</p>
       </div>
-      <form>
+      <form @submit.prevent="submitForm">
         <div class="control">
-          <input type="email" placeholder="School email" v-model="email" />
+          <input type="email" placeholder="School email" v-model="formData.email" />
         </div>
 
         <div class="control password">
-          <input :type="inputType" placeholder="Password" v-model="password" />
+          <input :type="inputType" placeholder="Password" v-model="formData.password" />
           <i :class="eyeIcon" id="eyeSlash" @click="eye_slash"></i>
         </div>
 
         <button>Log In</button>
-        <small class="no-account">Don't have an account?<router-link to="/register">SignUp</router-link></small>
+        <small class="no-account"
+          >Don't have an account?<router-link to="/register">SignUp</router-link></small
+        >
       </form>
     </div>
   </div>
@@ -128,16 +148,16 @@ const eye_slash = () => {
   display: none;
 }
 
-small.no-account{
+small.no-account {
   color: var(--w-grey);
   display: block;
   font-family: 'Montserrat';
   margin-top: 10px;
-  text-align: right
+  text-align: right;
 }
 
-small.no-account a{
-  text-decoration: underline ;
+small.no-account a {
+  text-decoration: underline;
   color: var(--blue);
 }
 @media (min-width: 900px) {

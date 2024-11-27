@@ -1,6 +1,6 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue'
-import axios from 'axios';
+import axios from 'axios'
 import { ref } from 'vue'
 
 // const eyeSlash = document.getElementById('eyeSlash')
@@ -20,22 +20,19 @@ const eye_slash = () => {
 }
 
 const formData = ref({
-  email:"",
-  matno:"",
-  level:"",
-  password:"",
+  email: '',
+  matno: '',
+  level: '',
+  password: ''
 })
 
-
-
-const submitForm =async ()=>{
-try {
-  const response = await axios.post("http://localhost:5000/api/auth/signup", formData.value)
-  console.log(response.data);
-  
-} catch (error) {
-  console.log(`Errro: ${error}`);
-}
+const submitForm = async () => {
+  try {
+    const response = await axios.post('http://localhost:5000/api/auth/signup', formData.value)
+    console.log(response.data)
+  } catch (error) {
+    console.log(`Errro: ${error}`)
+  }
 }
 </script>
 
