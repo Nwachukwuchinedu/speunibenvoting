@@ -28,13 +28,13 @@ import NavBar from '@/components/NavBar.vue'
   <br />
 
   <div class="container">
-    <div class="content">
+    <div class="content" v-auto-animate>
       <h1>Fast, Secured and Accessible Voting System</h1>
       <p>
         Let's make voting and elections easy for you. This is designed to ensure a secured voting
         session
       </p>
-      <router-link to="/register" class="btn-link">Register as a Voter</router-link>
+      <router-link to="/register" class="btn-link" v-auto-animate>Register as a Voter</router-link>
     </div>
     <img src="../img/undraw_add_user_re_5oib.svg" />
   </div>
