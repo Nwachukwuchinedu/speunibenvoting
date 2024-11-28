@@ -1,11 +1,16 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue'
-import { getUserData } from '@/auth/user'
-import {  onMounted, ref } from 'vue'
+import { getUserData, fetchAllPositions } from '@/axios/user'
+import { onMounted, ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const router = useRouter()
+
 const userData = ref(null)
+const positions = ref([])
+const selectedVotes = ref({})
+const votedCandidates = ref({})
 
 onMounted(async () => {
   try {
@@ -22,6 +27,89 @@ onMounted(async () => {
 const capitalizeFirstLetter = (str) => {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}
+
+// Fetch all positions
+onMounted(async () => {
+  try {
+    positions.value = await fetchAllPositions()
+  } catch (error) {
+    console.error('Failed to load positions:', error)
+  }
+})
+
+const baseURL = 'http://localhost:5173'
+
+// Computed property to update only the filePath
+const updatedPositions = computed(() =>
+  positions.value.map((position) => ({
+    ...position,
+    candidates: position.candidates.map((candidate) => ({
+      ...candidate,
+      filePath: candidate.picture
+        ? candidate.picture
+            .replace(
+              'C:\\Users\\Simeon\\OneDrive\\Documents\\coding\\speunibenvoting\\public',
+              baseURL
+            )
+            .replace(/\\/g, '/')
+        : '' // Use an empty string or provide a default value
+    }))
+  }))
+)
+
+// Watch updatedPositions for changes and log it
+watch(
+  updatedPositions,
+  (newVal) => {
+    console.log('Updated positions:', newVal)
+  },
+  { deep: true }
+)
+
+// Check if a candidate is voted
+const isVoted = (positionName, candidateId) => {
+  return votedCandidates.value[positionName] === candidateId
+}
+
+// Handle individual vote action
+const handleVote = (positionName, candidateId) => {
+  // Update selected candidate before voting
+  selectedVotes.value[positionName] = candidateId
+  // Mark as voted
+  votedCandidates.value[positionName] = candidateId
+}
+
+// Submit vote data
+const submitVote = async () => {
+  if (!userData.value) {
+    console.error('User not logged in')
+    return
+  }
+
+  // Prepare the vote data
+  const voteData = {
+    voterId: userData.value.matno, // Use matno as voterId
+    votes: Object.keys(selectedVotes.value).map((positionName) => {
+      return {
+        position: positionName,
+        candidateId: selectedVotes.value[positionName]
+      }
+    })
+  }
+
+  try {
+    const response = await axios.post('http://localhost:5000/api/vote/cast', voteData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log(selectedVotes.value)
+
+    console.log('Vote successfully cast:', response.data)
+  } catch (error) {
+    console.error('Error submitting vote:', error)
+  }
 }
 </script>
 
@@ -64,71 +152,45 @@ const capitalizeFirstLetter = (str) => {
     </div>
 
     <div class="candidates">
-      <h1>Candidates</h1>
-      <div class="list">
-        <div class="card">
-          <h2 class="title">President</h2>
-          <div class="inner">
-            <div>
-              <img src="../img/spelogo.jpeg" alt="" />
-              <h3>John Doe</h3>
-              <input type="checkbox" name="" id="">
-            </div>
-            <div>
-              <img src="../img/spelogo.jpeg" alt="" />
-              <h3>John Doe</h3>
-              <input type="checkbox" name="" id="">
-            </div>
-            <div>
-              <img src="../img/spelogo.jpeg" alt="" />
-              <h3>John Doe</h3>
-              <input type="checkbox" name="" id="">
+      <form @submit.prevent="submitVote">
+        <h1>Candidates</h1>
+        <div class="list">
+          <div class="card" v-for="position in updatedPositions" :key="position._id">
+            <h2 class="title">{{ position.name }}</h2>
+            <div class="inner">
+              <div v-for="candidate in position.candidates" :key="candidate._id">
+                <!-- Candidate Details -->
+                <img :src="candidate.filePath" alt="Candidate Picture" />
+                <h3>{{ candidate.name }}</h3>
+
+                <!-- Hidden Radio Button -->
+                <input
+                  type="radio"
+                  :name="position.name"
+                  :value="candidate._id"
+                  v-model="selectedVotes[position.name]"
+                  class="hidden-radio"
+                />
+
+                <!-- Vote Button -->
+                <button
+                  type="button"
+                  :class="{
+                    'voted-button': isVoted(position.name, candidate._id),
+                    'vote-button': !isVoted(position.name, candidate._id)
+                  }"
+                  @click="handleVote(position.name, candidate._id)"
+                >
+                  {{ isVoted(position.name, candidate._id) ? 'Voted' : 'Vote' }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="card">
-          <h2 class="title">Vice President</h2>
-          <div class="inner">
-            <div>
-              <img src="../img/spelogo.jpeg" alt="" />
-              <h3>John Doe</h3>
-              <input type="checkbox" name="" id="">
-            </div>
-            <div>
-              <img src="../img/spelogo.jpeg" alt="" />
-              <h3>John Doe</h3>
-              <input type="checkbox" name="" id="">
-            </div>
-            <div>
-              <img src="../img/spelogo.jpeg" alt="" />
-              <h3>John Doe</h3>
-              <input type="checkbox" name="" id="">
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2 class="title">Treasurer</h2>
-          <div class="inner">
-            <div>
-              <img src="../img/spelogo.jpeg" alt="" />
-              <h3>John Doe</h3>
-              <input type="checkbox" name="" id="">
-            </div>
-            <div>
-              <img src="../img/spelogo.jpeg" alt="" />
-              <h3>John Doe</h3>
-              <input type="checkbox" name="" id="">
-            </div>
-            <div>
-              <img src="../img/spelogo.jpeg" alt="" />
-              <h3>John Doe</h3>
-              <input type="checkbox" name="" id="">
-            </div>
-          </div>
-        </div>
-      </div>
+        <!-- Final Vote Submission -->
+        <button type="submit">Submit Vote</button>
+      </form>
     </div>
   </div>
 </template>
@@ -203,6 +265,16 @@ const capitalizeFirstLetter = (str) => {
   margin-bottom: 10px;
 }
 
+.candidates button {
+  background: var(--blue);
+  color: #fff;
+  padding: 10px;
+  font-family: 'Poppins';
+  border: none;
+  cursor: pointer;
+  margin: 15px 0;
+}
+
 .candidates .card {
   background: linear-gradient(#fffefe, #fffbfb);
   box-shadow: var(--sdw-2);
@@ -240,6 +312,7 @@ const capitalizeFirstLetter = (str) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.07);
 }
 
 .candidates .card .inner div input {
@@ -258,5 +331,118 @@ const capitalizeFirstLetter = (str) => {
   border-radius: 50%;
   margin: 20px 10px;
   object-fit: cover;
+}
+
+.hidden-radio {
+  display: none;
+}
+
+.candidates button.vote-button {
+  background-color: blue;
+  color: white;
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.candidates button.voted-button {
+  background-color: green;
+  color: white;
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: not-allowed;
+}
+
+.welcome {
+  animation: fadeIn 0.8s ease-in;
+}
+
+/* Pulse animation for countdown cards */
+.time-container .card .time {
+  transition: transform 0.3s ease;
+}
+
+.time-container .card .time:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Candidate cards hover effect */
+.candidates .card {
+  transition: all 0.3s ease;
+}
+
+.candidates .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Candidate images zoom effect */
+.candidates img {
+  transition: transform 0.3s ease;
+}
+
+.candidates img:hover {
+  transform: scale(1.1);
+}
+
+/* Vote button animation */
+.candidates button {
+  transition: all 0.3s ease;
+}
+
+.candidates button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Checkbox custom animation */
+.candidates .card .inner div input {
+  transition: all 0.2s ease;
+}
+
+.candidates .card .inner div input:checked {
+  transform: scale(1.2);
+}
+
+/* Keyframes for fade in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add stagger effect for candidate cards */
+.candidates .list .card {
+  animation: slideIn 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.candidates .list .card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.candidates .list .card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.candidates .list .card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 </style>
