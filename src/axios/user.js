@@ -45,3 +45,24 @@ export const fetchAllPositions = async () => {
   }
 }
 
+
+
+export const checkIfUserHasVoted = async (voterId) => {
+  try {
+    const response = await axios.post('http://localhost:5000/api/vote/has-voted', {
+      voterId
+    })
+
+    if (response.data.hasVoted) {
+      console.log('User has already voted.')
+    } else {
+      console.log('User has not voted yet.')
+    }
+
+    return response.data // Optional: return the response for further use
+  } catch (error) {
+    console.error('Error checking voting status:', error.response?.data || error.message)
+    throw error
+  }
+}
+
