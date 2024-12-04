@@ -1,6 +1,6 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue'
-import { getUserData, fetchAllPositions } from '@/axios/user'
+import { getUserData, fetchAllPositions, checkIfUserHasVoted } from '@/axios/user'
 import { onMounted, ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -11,15 +11,25 @@ const userData = ref(null)
 const positions = ref([])
 const selectedVotes = ref({})
 const votedCandidates = ref({})
+const hasVotedData = ref(null)
+const isLoading = ref(true)
 
 onMounted(async () => {
   try {
     const user = await getUserData()
     userData.value = user
     console.log(userData.value)
+
+    const hasVoted = await checkIfUserHasVoted(userData.value.matno)
+    hasVotedData.value = hasVoted
+
+    console.log(hasVotedData.value)
+    console.log(userData.value)
   } catch (error) {
-    console.log(error)
+    console.error(error)
     router.push('/login')
+  } finally {
+    isLoading.value = false
   }
 })
 
@@ -66,6 +76,16 @@ watch(
   },
   { deep: true }
 )
+
+// Check if a user has voted
+// onMounted(async () => {
+//   try{
+//     hasVotedData.value = await checkIfUserHasVoted(userData.value)
+//     console.log('User has voted:', userData.value)
+//   } catch (error) {
+//     console.error('Error checking user voted:', error)
+//   }
+// })
 
 // Check if a candidate is voted
 const isVoted = (positionName, candidateId) => {
@@ -117,8 +137,19 @@ const submitVote = async () => {
   <NavBar />
   <br /><br /><br /><br /><br />
   <br />
-
-  <div class="container">
+  <div v-if="userData && !userData.verified" class="container">
+    <div class="welcome">
+      <h1 v-if="userData && userData.email" class="welcome-text">
+        Hello, {{ capitalizeFirstLetter(userData.email.split('@')[0].split('.')[0]) }}!
+      </h1>
+      <p>
+        You have not verified your email address. Please verify your email address before casting
+        your vote.
+      </p>
+      <button class="verify">Send Verification Email</button>
+    </div>
+  </div>
+  <div v-else class="container">
     <div class="welcome">
       <h1 v-if="userData && userData.email" class="welcome-text">
         Hello, {{ capitalizeFirstLetter(userData.email.split('@')[0].split('.')[0]) }}!
@@ -173,15 +204,27 @@ const submitVote = async () => {
                 />
 
                 <!-- Vote Button -->
+                <button v-if="isLoading">
+                  <p>Loading...</p>
+                </button>
                 <button
+                  v-else
                   type="button"
+                  :disabled="hasVotedData?.hasVoted || isVoted(position.name, candidate._id)"
                   :class="{
                     'voted-button': isVoted(position.name, candidate._id),
-                    'vote-button': !isVoted(position.name, candidate._id)
+                    'vote-button': !isVoted(position.name, candidate._id),
+                    'disabled-button': hasVotedData?.hasVoted
                   }"
                   @click="handleVote(position.name, candidate._id)"
                 >
-                  {{ isVoted(position.name, candidate._id) ? 'Voted' : 'Vote' }}
+                  {{
+                    hasVotedData?.hasVoted
+                      ? 'Voted'
+                      : isVoted(position.name, candidate._id)
+                        ? 'Voted'
+                        : 'Vote'
+                  }}
                 </button>
               </div>
             </div>
@@ -189,7 +232,15 @@ const submitVote = async () => {
         </div>
 
         <!-- Final Vote Submission -->
-        <button type="submit">Submit Vote</button>
+        <button
+          type="submit"
+          :disabled="hasVotedData?.hasVoted"
+          :class="{
+            'disabled-button': hasVotedData?.hasVoted
+          }"
+        >
+          {{ hasVotedData?.hasVoted ? 'Voted' : 'SubmitVote' }}
+        </button>
       </form>
     </div>
   </div>
@@ -208,6 +259,14 @@ const submitVote = async () => {
   padding: 10%;
   display: flex;
   flex-direction: column;
+}
+.verify {
+  background-color: var(--blue);
+  color: white;
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .end {
@@ -352,6 +411,12 @@ const submitVote = async () => {
   padding: 0.5em 1em;
   border: none;
   border-radius: 5px;
+  cursor: not-allowed;
+}
+
+.candidates button.disabled-button {
+  background-color: rgb(212, 211, 211);
+  color: white;
   cursor: not-allowed;
 }
 
