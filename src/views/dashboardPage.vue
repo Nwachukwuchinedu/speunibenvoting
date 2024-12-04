@@ -1,6 +1,6 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue'
-import { getUserData, fetchAllPositions, checkIfUserHasVoted } from '@/axios/user'
+import { getUserData, fetchAllPositions, checkIfUserHasVoted, sendVerificationEmailFunc } from '@/axios/user'
 import { onMounted, ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -131,6 +131,15 @@ const submitVote = async () => {
     console.error('Error submitting vote:', error)
   }
 }
+
+const sendVerificationEmail = async()=>{
+  try{
+    const userData = await getUserData()
+    await sendVerificationEmailFunc(userData?.email)
+  }catch(err){
+    console.log(err);
+  }
+}
 </script>
 
 <template>
@@ -146,7 +155,7 @@ const submitVote = async () => {
         You have not verified your email address. Please verify your email address before casting
         your vote.
       </p>
-      <button class="verify">Send Verification Email</button>
+      <button class="verify" @click="sendVerificationEmail()">Send Verification Email</button>
     </div>
   </div>
   <div v-else class="container">

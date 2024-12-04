@@ -6,7 +6,6 @@ import axios from 'axios'
  * @returns {Promise} Resolves with user data or throws an error if the token is invalid.
  */
 
-
 const BASE_URL = 'http://localhost:5000/api'
 
 export const getUserData = async () => {
@@ -33,8 +32,6 @@ export const getUserData = async () => {
   }
 }
 
-
-
 export const fetchAllPositions = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/position/all`)
@@ -44,8 +41,6 @@ export const fetchAllPositions = async () => {
     throw error
   }
 }
-
-
 
 export const checkIfUserHasVoted = async (voterId) => {
   try {
@@ -66,3 +61,13 @@ export const checkIfUserHasVoted = async (voterId) => {
   }
 }
 
+export const sendVerificationEmailFunc = async (email) => {
+  try {
+    const response = await axios.post('http://localhost:5000/api/auth/verify-email', { email })
+    console.log(response)
+    return response.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
