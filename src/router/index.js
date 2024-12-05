@@ -36,7 +36,7 @@ const router = createRouter({
       component: ResetPassword
     },
     {
-      path: '/verify-account',
+      path: '/verify-email',
       name: 'Verify-Account',
       component: VerifyAccount
     },{
