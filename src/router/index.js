@@ -6,6 +6,8 @@ import ResetPassword from '@/views/resetPassword.vue'
 import ForgotPassword from '@/views/forgotPassword.vue'
 import VerifyAccount from '@/views/verifyAccount.vue'
 import DashboardPage from '@/views/dashboardPage.vue'
+import AdminLogin from '@/views/adminLogin.vue'
+import AdminDashboard from '@/views/adminDashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,10 +41,21 @@ const router = createRouter({
       path: '/verify-email',
       name: 'Verify-Account',
       component: VerifyAccount
-    },{
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: DashboardPage
+    },
+    {
+      path: '/admin-login',
+      name: 'Admin Login',
+      component: AdminLogin
+    },
+    {
+      path: '/admin-dashboard',
+      name: 'Admin Dashboard',
+      component: AdminDashboard
     }
   ]
 })
