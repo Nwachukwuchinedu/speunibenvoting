@@ -1,36 +1,34 @@
 <script setup>
-import NavBar from '@/components/NavBar.vue'
-import { getAdminData, fetchAllPositions, sendVerificationEmailFunc } from '@/axios/user'
+// import NavBar from '@/components/NavBar.vue'
+import { getAdminData, fetchAllPositions, fetchAllUsers } from '@/axios/user'
 import { onMounted, ref, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 
 const userData = ref(null)
 const positions = ref([])
+const allUsersData = ref([])
 
 onMounted(async () => {
-//   try {
-//     const user = await getAdminData()
-//     userData.value = user
-//     console.log(userData.value)
-
-//     const hasVoted = await checkIfUserHasVoted(userData.value.matno)
-//     hasVotedData.value = hasVoted
-
-//     console.log(hasVotedData.value)
-//     console.log(userData.value)
-//   } catch (error) {
-//     console.error(error)
-//     router.push('/admin-login')
-//   } finally {
-//     isLoading.value = false
-//   }
+  try {
+    const user = await getAdminData()
+    const allUers = await fetchAllUsers()
+    userData.value = user
+    allUsersData.value = allUers
+  } catch (error) {
+    console.error(error)
+    router.push('/admin-login')
+  } finally {
+    // isLoading.value = false
+  }
 })
 
-// Method to capitalize the first letter
-const capitalizeFirstLetter = (str) => {
-  if (!str) return ''
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-}
+// // Method to capitalize the first letter
+// const capitalizeFirstLetter = (str) => {
+//   if (!str) return ''
+//   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+// }
 
 // Fetch all positions
 onMounted(async () => {
@@ -65,314 +63,345 @@ const updatedPositions = computed(() =>
 watch(
   updatedPositions,
   (newVal) => {
-    console.log('Updated positions:', newVal)
+    // console.log('Updated positions:', newVal)
+    return newVal
   },
   { deep: true }
 )
 
+// const sendVerificationEmail = async()=>{
+//   try{
+//     const userData = await getAdminData()
+//     await sendVerificationEmailFunc(userData?.email)
+//   }catch(err){
+//     console.log(err);
+//   }
+// }
 
-const sendVerificationEmail = async()=>{
-  try{
-    const userData = await getAdminData()
-    await sendVerificationEmailFunc(userData?.email)
-  }catch(err){
-    console.log(err);
-  }
+const isMenuOpen = ref(false)
+
+function toggleMenu() {
+  isMenuOpen.value = !isMenuOpen.value
 }
-
 </script>
 
 <template>
-  <NavBar />
-  <br /><br /><br /><br /><br />
-  <br />
-  <div v-if="userData && !userData.verified" class="container">
-    <div class="welcome">
-      <h1 v-if="userData && userData.email" class="welcome-text">
-        Hello, {{ capitalizeFirstLetter(userData.email.split('@')[0].split('.')[0]) }}!
-      </h1>
-      <p>
-        You have not verified your email address. Please verify your email address before casting
-        your vote.
-      </p>
-      <button class="verify" @click="sendVerificationEmail()">Send Verification Email</button>
+  <div>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <h1 class="brand">Election System</h1>
+      <button class="menu-btn" @click="toggleMenu">☰</button>
+    </nav>
+
+    <!-- Offcanvas Menu -->
+    <div class="offcanvas" :class="{ open: isMenuOpen }">
+      <button class="close-btn" @click="toggleMenu">&times;</button>
+      <ul class="menu-list">
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Voters</a></li>
+        <li><a href="#">Candidates</a></li>
+        <li><a href="#">Results</a></li>
+        <li><a href="#">System Logs</a></li>
+      </ul>
     </div>
-  </div>
-  <div v-else class="container">
-    <div class="welcome">
-      <h1 v-if="userData && userData.email" class="welcome-text">
-        Hello, {{ capitalizeFirstLetter(userData.email.split('@')[0].split('.')[0]) }}!
-      </h1>
-      <p>
-        Cast your vote for your preferred candidates. Be part of the decision-making process. The
-        election countdown is displayed below. Ensure you vote before the time runs out!
-      </p>
-    </div>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h2>Welcome, Admin John!</h2>
+      <div class="actions">
+        <div class="action-wrap">
+          <h2 class="action-title">Timer</h2>
+          <div class="action">
+            <div class="action-item">
+              <h3>Start/End Election</h3>
+              <p>Start the election or end the election</p>
+              <button>Start Election</button>
+            </div>
+            <div class="action-item">
+              <h3>Countdown Timer Settings</h3>
+              <p>Set the countdown timer for the election</p>
+              <button>Open</button>
+            </div>
+          </div>
+        </div>
+        <div class="action-wrap">
+          <h2 class="action-title">Upload Candidates</h2>
+          <div class="action">
+            <div class="action-item">
+              <h3>Upload Data and Results</h3>
+              <p>Upload voter data, candidate data, and election results</p>
+              <button>Upload Now</button>
+            </div>
+          </div>
+        </div>
+        <div class="action-wrap">
+          <h2 class="action-title">Manage Candidates</h2>
+
+          <div class="action candidate-action">
+            <div v-for="position in positions" :key="position.id" class="action-content">
+              <div
+                v-for="candidate in position.candidates"
+                :key="candidate.id"
+                class="action-item img"
+              >
+                <div class="three-dot">:</div>
+                <div class="img">
+                  <img :src="candidate.picture" :alt="candidate.name" />
+                </div>
+                <h4>{{ candidate.name }}</h4>
+                <p>{{ position.name }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="action-wrap">
+          <h2 class="action-title">Manage Voters</h2>
+          <div class="action">
+            <div class="action-item">
+              <input type="search" class="search" placeholder="MAT NO" />
+            </div>
+            <div class="action-item">
+              <select name="level">
+                <option value="none">None</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="300">300</option>
+                <option value="400">400</option>
+                <option value="500">500</option>
+              </select>
+            </div>
+            <div class="action-item">
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>MAT NO</th>
+                      <th>LEVEL</th>
+                      <th>VOTED</th>
+                      <th>INVALID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="user in allUsersData" :key="user.matno">
+                      <td>{{ user.matno }}</td>
+                      <td>{{ user.level }}</td>
+                      <td>{{ user.voted ? 'True' : 'False' }}</td>
+                      <td>
+                        <form><input type="checkbox" name="invalid" /></form>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </template>
 
 <style scoped>
-.welcome {
-  padding: 0 0 40px 0;
+/* Global Styles */
+body {
+  font-family: 'Public Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+  color: #0e141b;
 }
-.welcome-text {
-  font-family: 'Poppins';
-  color: #222;
-  margin-bottom: 20px;
-}
-.container {
-  padding: 10%;
+
+/* Navbar Styles */
+.navbar {
   display: flex;
-  flex-direction: column;
-}
-.verify {
-  background-color: var(--blue);
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1980e6;
   color: white;
-  padding: 0.5em 1em;
+  padding: 1rem;
+}
+.menu-btn {
+  font-size: 1.5rem;
+  background: none;
   border: none;
-  border-radius: 5px;
+  color: white;
   cursor: pointer;
 }
-
-.end {
-  padding: 10% 0;
+.brand {
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
-.end h2 {
-  font-family: 'Poppins';
-  color: #222;
-  padding: 10px 0;
-  margin-bottom: 10px;
+/* Offcanvas Menu Styles */
+.offcanvas {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100%;
+  background-color: #0e141b;
+  color: white;
+  padding: 1rem;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+  transition: left 0.3s ease;
+}
+.offcanvas.open {
+  left: 0;
+}
+.close-btn {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+.menu-list {
+  list-style: none;
+  padding: 0;
+}
+.menu-list li {
+  margin: 1rem 0;
+}
+.menu-list a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+}
+.menu-list a:hover {
+  text-decoration: underline;
 }
 
-.time-container {
+/* Main Content Styles */
+.content {
+  padding: 2rem;
+}
+.content h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.action {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-grow: 1;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.action.candidate-action {
+  flex-direction: column;
+}
+.action-content {
+  display: flex;
   flex-wrap: wrap;
 }
+.action-wrap {
+  border: 1px solid #d0dbe7;
+  border-radius: 8px;
+  padding: 5%;
+  margin-bottom: 50px;
+}
 
-.time-container .card {
+.action-item {
+  background-color: white;
+  border: 1px solid #d0dbe7;
+  border-radius: 8px;
+  padding: 1rem;
+  flex: 1;
+  min-width: 250px;
+}
+
+.action-item.img {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
+  margin: 20px;
 }
 
-.time-container .card .time {
-  width: 200px;
-  height: 100px;
+.action-item.img .img {
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+}
+
+.action-item.img .img img {
+  height: 100%;
+  width: 100%;
+  object-position: center;
+}
+
+.action-title {
+  padding: 5px;
+}
+.action-item h3 {
+  margin-top: 0;
+}
+.action-item button {
+  background-color: #1980e6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.action-item button:hover {
+  background-color: #146bb3;
+}
+
+.three-dot {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+}
+
+.search {
   background: #f4f4f4;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Poppins';
-  font-size: 40px;
-  margin: 10px;
+  padding: 10px 5px;
 }
 
-.time-container .card .text {
-  font-family: 'Montserrat';
+.table-container {
+  overflow-x: auto;
 }
 
-@media (max-width: 600px) {
-  .time-container .card .time {
-    width: 100px;
-  }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
 }
 
-.candidates h1 {
-  font-family: 'Poppins';
-  color: #222;
-  padding: 10px 0;
-  margin-bottom: 10px;
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
 }
 
-.candidates button {
-  background: var(--blue);
-  color: #fff;
-  padding: 10px;
-  font-family: 'Poppins';
-  border: none;
-  cursor: pointer;
-  margin: 15px 0;
+th {
+  background-color: #f4f4f4;
+  font-weight: bold;
 }
 
-.candidates .card {
-  background: linear-gradient(#fffefe, #fffbfb);
-  box-shadow: var(--sdw-2);
-  padding: 20px;
-  margin: 10px 0 100px 0;
+tr:nth-child(even) {
+  background-color: #f9f9f9;
 }
 
-.candidates .card .title {
-  font-family: 'Poppins';
-  color: #222;
-  padding: 10px 0;
+tr:hover {
+  background-color: #f1f1f1;
 }
 
-.candidates .card .inner {
-  display: flex;
-  flex-wrap: wrap; /* Allow items to wrap to the next line if needed */
-  justify-content: space-between; /* Distribute space evenly between items */
-  align-items: center; /* Center items vertically */
-  gap: 20px; /* Optional: space between items if you want more control */
-  padding: 10px 0;
-  width: 100%; /* Ensure the inner container takes up full width */
-  box-sizing: border-box; /* Include padding in the width calculation */
+td form {
+  margin: 0;
 }
 
-.candidates .card .inner > * {
-  flex: 1 1 auto; /* Allow items to grow and shrink */
-  min-width: 200px; /* Prevent items from becoming too small */
-  text-align: center; /* Center text inside each item */
-}
-
-.candidates .card .inner div {
-  padding: 10px;
-  font-family: 'Montserrat';
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.07);
-}
-
-.candidates .card .inner div input {
-  background: var(--blue);
-  color: #fff;
-  padding: 10px;
-  font-family: 'Poppins';
-  border: none;
-  cursor: pointer;
-  margin: 15px 0;
-}
-
-.candidates img {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  margin: 20px 10px;
-  object-fit: cover;
-}
-
-.hidden-radio {
-  display: none;
-}
-
-.candidates button.vote-button {
-  background-color: blue;
-  color: white;
-  padding: 0.5em 1em;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.candidates button.voted-button {
-  background-color: green;
-  color: white;
-  padding: 0.5em 1em;
-  border: none;
-  border-radius: 5px;
-  cursor: not-allowed;
-}
-
-.candidates button.disabled-button {
-  background-color: rgb(212, 211, 211);
-  color: white;
-  cursor: not-allowed;
-}
-
-.welcome {
-  animation: fadeIn 0.8s ease-in;
-}
-
-/* Pulse animation for countdown cards */
-.time-container .card .time {
-  transition: transform 0.3s ease;
-}
-
-.time-container .card .time:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Candidate cards hover effect */
-.candidates .card {
-  transition: all 0.3s ease;
-}
-
-.candidates .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Candidate images zoom effect */
-.candidates img {
-  transition: transform 0.3s ease;
-}
-
-.candidates img:hover {
-  transform: scale(1.1);
-}
-
-/* Vote button animation */
-.candidates button {
-  transition: all 0.3s ease;
-}
-
-.candidates button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* Checkbox custom animation */
-.candidates .card .inner div input {
-  transition: all 0.2s ease;
-}
-
-.candidates .card .inner div input:checked {
+input[type='checkbox'] {
   transform: scale(1.2);
 }
 
-/* Keyframes for fade in */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Add stagger effect for candidate cards */
-.candidates .list .card {
-  animation: slideIn 0.6s ease-out;
-  animation-fill-mode: both;
-}
-
-.candidates .list .card:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.candidates .list .card:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.candidates .list .card:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+/* Small screen adjustments */
+@media (max-width: 768px) {
+  th,
+  td {
+    font-size: 0.9rem;
   }
 }
 </style>
