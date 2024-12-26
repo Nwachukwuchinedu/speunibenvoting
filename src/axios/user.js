@@ -56,16 +56,28 @@ export const getAdminData = async () => {
   }
 }
 
-
 export const fetchAllPositions = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/position/all`)
-    return response.data // The array of positions
+
+    // Transform the picture paths
+    const transformedData = response.data.map((position) => ({
+      ...position,
+      candidates: position.candidates.map((candidate) => ({
+        ...candidate,
+        picture: candidate.picture.replace(/.*\\public\\/, '../../public/').replace(/\\/g, '/')
+      }))
+    }))
+
+    console.log(transformedData)
+
+    return transformedData // The transformed array of positions
   } catch (error) {
     console.error('Error fetching positions:', error)
     throw error
   }
 }
+
 
 export const checkIfUserHasVoted = async (voterId) => {
   try {
@@ -96,3 +108,18 @@ export const sendVerificationEmailFunc = async (email) => {
     throw error
   }
 }
+
+export const fetchAllUsers = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/auth/all-users')
+
+    // Handle the response data
+    console.log(response.data) // Logs the fetched data
+
+    return response.data // Optionally, return the data for further use
+  } catch (error) {
+    // Handle errors
+    console.error('Error fetching data:', error)
+  }
+}
+
