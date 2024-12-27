@@ -21,6 +21,8 @@ const eye_slash = () => {
 
 const formData = ref({
   email: '',
+  fullname: '',
+  nickname: '',
   matno: '',
   level: '',
   password: ''
@@ -28,7 +30,10 @@ const formData = ref({
 
 const submitForm = async () => {
   try {
-    const response = await axios.post('https://speunibenvotingapi.onrender.com/api/auth/signup', formData.value)
+    const response = await axios.post(
+      'https://speunibenvotingapi.onrender.com/api/auth/signup',
+      formData.value
+    )
     console.log(response.data)
   } catch (error) {
     console.log(`Errro: ${error}`)
@@ -52,7 +57,15 @@ const submitForm = async () => {
       </div>
       <form @submit.prevent="submitForm">
         <div class="control">
-          <input type="email" placeholder="School email" v-model="formData.email" />
+          <input type="email" placeholder="Email" v-model="formData.email" />
+        </div>
+
+        <div class="control">
+          <input type="text" placeholder="Fullname" v-model="formData.fullname" />
+        </div>
+
+        <div class="control">
+          <input type="text" placeholder="Nickname" v-model="formData.nickname" />
         </div>
 
         <div class="control">
