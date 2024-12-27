@@ -1,19 +1,31 @@
-<script>
+<script setup>
 // For the hamburger menu for small screen
-export default {
-  data() {
-    return {
-      isActive: false
-    }
-  },
-  methods: {
-    // return true if false when clicked
-    // return false if true when clicked
-    toggleClass() {
-      this.isActive = !this.isActive
-    }
-  }
+import { ref, onMounted } from 'vue'
+import { getUserData } from '@/axios/user'
+
+const isActive = ref(false)
+const userData = ref(null)
+const auth = ref(false)
+
+// Toggle the active status
+const toggleClass = () => {
+  isActive.value = !isActive.value
 }
+
+onMounted(async () => {
+  try {
+    const user = await getUserData()
+    userData.value = user[1]
+    if (userData.value === 200) {
+      auth.value = true
+    } else {
+      auth.value = false
+    }
+    console.log(userData.value)
+  } catch (error) {
+    console.error(error)
+  }
+})
 </script>
 
 <template>
@@ -24,7 +36,10 @@ export default {
       <h2>SPE UNIBEN</h2>
       <i class="fa-solid fa-bars fa-2x" @click="toggleClass"></i>
     </div>
-    <ul>
+    <ul v-if="auth">
+      <li><router-link to="/login">Logout</router-link></li>
+    </ul>
+    <ul v-else>
       <li><router-link to="/">Home</router-link></li>
       <li><router-link to="/login">LogIn</router-link></li>
       <li><router-link to="/register">Register</router-link></li>
