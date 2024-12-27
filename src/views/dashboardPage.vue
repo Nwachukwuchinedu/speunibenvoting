@@ -34,10 +34,10 @@ onMounted(async () => {
 })
 
 // Method to capitalize the first letter
-const capitalizeFirstLetter = (str) => {
-  if (!str) return ''
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-}
+// const capitalizeFirstLetter = (str) => {
+//   if (!str) return ''
+//   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+// }
 
 // Fetch all positions
 onMounted(async () => {
@@ -160,8 +160,8 @@ const sendVerificationEmail = async()=>{
   </div>
   <div v-else class="container">
     <div class="welcome">
-      <h1 v-if="userData && userData.email" class="welcome-text">
-        Hello, {{ capitalizeFirstLetter(userData.email.split('@')[0].split('.')[0]) }}!
+      <h1 v-if="userData && userData.nickname" class="welcome-text">
+        Hello, {{ userData.nickname }}!
       </h1>
       <p>
         Cast your vote for your preferred candidates. Be part of the decision-making process. The
