@@ -9,7 +9,7 @@ const router = useRouter()
 const userData = ref(null)
 const positions = ref([])
 const allUsersData = ref([])
-const backedndURI = "http://localhost:5000"
+const backedndURI = 'http://localhost:5000'
 onMounted(async () => {
   try {
     const user = await getAdminData()
