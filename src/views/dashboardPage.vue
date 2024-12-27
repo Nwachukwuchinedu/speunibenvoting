@@ -148,8 +148,8 @@ const sendVerificationEmail = async()=>{
   <br />
   <div v-if="userData && !userData.verified" class="container">
     <div class="welcome">
-      <h1 v-if="userData && userData.email" class="welcome-text">
-        Hello, {{ capitalizeFirstLetter(userData.email.split('@')[0].split('.')[0]) }}!
+      <h1 v-if="userData && userData.nickname" class="welcome-text">
+        Hello, {{userData.nickname}}!
       </h1>
       <p>
         You have not verified your email address. Please verify your email address before casting
