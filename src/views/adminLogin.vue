@@ -28,7 +28,10 @@ const formData = ref({
 
 const submitForm = async () => {
   try {
-    const response = await axios.post('http://localhost:5000/api/admin/login', formData.value)
+    const response = await axios.post(
+      'https://speunibenvotingapi.onrender.com/api/admin/login',
+      formData.value
+    )
     const token = response.data.token
     localStorage.setItem('admin-token', token)
     router.push('/admin-dashboard')
