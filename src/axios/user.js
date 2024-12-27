@@ -39,11 +39,14 @@ export const getAdminData = async () => {
   }
 
   try {
-    const response = await axios.get('http://localhost:5000/api/admin/me', {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const response = await axios.get(
+      'https://speunibenvotingapi.onrender.com/api/admin/me',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
-    })
+    )
     return response.data
   } catch (error) {
     console.error('Error fetching user data:', error)
