@@ -28,7 +28,7 @@ const formData = ref({
 
 const submitForm = async () => {
   try {
-    const response = await axios.post('http://localhost:5000/api/auth/signup', formData.value)
+    const response = await axios.post('https://speunibenvotingapi.onrender.com/api/auth/signup', formData.value)
     console.log(response.data)
   } catch (error) {
     console.log(`Errro: ${error}`)

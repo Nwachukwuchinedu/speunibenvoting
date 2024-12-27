@@ -9,7 +9,7 @@ const success = ref(false)
 const token = new URLSearchParams(window.location.search).get('token')
 const verifyAccount = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/auth/verify-account', {
+    const response = await axios.get('https://speunibenvotingapi.onrender.com/api/auth/verify-account', {
       params: { token } // Attach token as query param
     })
 
