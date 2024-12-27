@@ -6,7 +6,7 @@ import axios from 'axios'
  * @returns {Promise} Resolves with user data or throws an error if the token is invalid.
  */
 
-const BASE_URL = 'http://localhost:5000/api'
+const BASE_URL = 'https://speunibenvotingapi.onrender.com'
 
 export const getUserData = async () => {
   const token = localStorage.getItem('token')
@@ -15,7 +15,7 @@ export const getUserData = async () => {
   }
 
   try {
-    const response = await axios.get('http://localhost:5000/api/auth/user/me', {
+    const response = await axios.get(`${BASE_URL}/api/auth/user/me`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -40,7 +40,7 @@ export const getAdminData = async () => {
 
   try {
     const response = await axios.get(
-      'https://speunibenvotingapi.onrender.com/api/admin/me',
+      `${BASE_URL}/api/admin/me`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -61,7 +61,7 @@ export const getAdminData = async () => {
 
 export const fetchAllPositions = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/position/all`)
+    const response = await axios.get(`${BASE_URL}/api/position/all`)
 
     // Transform the picture paths
     const transformedData = response.data.map((position) => ({
@@ -84,7 +84,7 @@ export const fetchAllPositions = async () => {
 
 export const checkIfUserHasVoted = async (voterId) => {
   try {
-    const response = await axios.post('http://localhost:5000/api/vote/has-voted', {
+    const response = await axios.post(`${BASE_URL}/api/vote/has-voted`, {
       voterId
     })
 
@@ -103,7 +103,7 @@ export const checkIfUserHasVoted = async (voterId) => {
 
 export const sendVerificationEmailFunc = async (email) => {
   try {
-    const response = await axios.post('http://localhost:5000/api/auth/verify-email', { email })
+    const response = await axios.post(`${BASE_URL}/api/auth/verify-email`, { email })
     console.log(response)
     return response.data
   } catch (error) {
@@ -114,7 +114,7 @@ export const sendVerificationEmailFunc = async (email) => {
 
 export const fetchAllUsers = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/auth/all-users')
+    const response = await axios.get(`${BASE_URL}/api/auth/all-users`)
 
     // Handle the response data
     console.log(response.data) // Logs the fetched data
