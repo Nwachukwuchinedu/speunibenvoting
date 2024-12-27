@@ -9,7 +9,7 @@ const router = useRouter()
 const userData = ref(null)
 const positions = ref([])
 const allUsersData = ref([])
-
+const backedndURI = "http://localhost:5000"
 onMounted(async () => {
   try {
     const user = await getAdminData()
@@ -146,7 +146,7 @@ function toggleMenu() {
               >
                 <div class="three-dot">:</div>
                 <div class="img">
-                  <img :src="candidate.picture" :alt="candidate.name" />
+                  <img :src="`${backedndURI}/${candidate.picture}`" :alt="candidate.name" />
                 </div>
                 <h4>{{ candidate.name }}</h4>
                 <p>{{ position.name }}</p>
