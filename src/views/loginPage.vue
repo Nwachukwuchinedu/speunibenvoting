@@ -26,14 +26,30 @@ const formData = ref({
   password: ''
 })
 
+const errorMessage = ref({})
+const loading = ref(false) // Track loading state
+
 const submitForm = async () => {
+  loading.value = true // Start loading
   try {
-    const response = await axios.post('https://speunibenvotingapi.onrender.com/api/auth/login', formData.value)
+    const response = await axios.post('http://localhost:5000/api/auth/login', formData.value)
     const token = response.data.token
     localStorage.setItem('token', token)
     router.push('/dashboard')
   } catch (error) {
-    console.log(`Errro: ${error}`)
+    // Capture and display API errors
+    if (error.response && error.response.status === 401) {
+      errorMessage.value = error.response.data
+
+      // Automatically clear error messages after 5 seconds
+      setTimeout(() => {
+        errorMessage.value = {}
+      }, 5000)
+    } else {
+      console.error(`Unexpected Error: ${error.message}`)
+    }
+  } finally {
+    loading.value = false // Stop loading
   }
 }
 </script>
@@ -54,15 +70,20 @@ const submitForm = async () => {
       </div>
       <form @submit.prevent="submitForm">
         <div class="control">
-          <input type="email" placeholder="School email" v-model="formData.email" />
+          <input type="email" placeholder="Email" v-model="formData.email" />
+          <small v-if="errorMessage.email" class="error">{{ errorMessage.email }}</small>
         </div>
 
         <div class="control password">
           <input :type="inputType" placeholder="Password" v-model="formData.password" />
           <i :class="eyeIcon" id="eyeSlash" @click="eye_slash"></i>
+          <small v-if="errorMessage.password" class="error">{{ errorMessage.password }}</small>
         </div>
 
-        <button>Log In</button>
+        <button :disabled="loading">
+          <span v-if="loading" class="spinner"></span>
+          <span v-else>Log In</span>
+        </button>
         <small class="no-account"
           >Don't have an account?<router-link to="/register">SignUp</router-link></small
         >
@@ -89,17 +110,10 @@ const submitForm = async () => {
 }
 
 .form-container .content small.error {
+  color: red;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
   font-family: 'Montserrat';
-  padding: 10px;
-  background: #fff;
-  display: inline-block;
-  box-shadow: var(--sdw-1);
-  width: 100%;
-  border-bottom: 1px solid red;
-  transform: translateY(-10px);
-  visibility: hidden;
-  opacity: 0;
-  transition: all 0.2s linear;
 }
 
 .form-container .content .title h1 {
@@ -164,6 +178,42 @@ small.no-account a {
   .form-container img {
     min-width: 400px;
     display: block;
+  }
+}
+
+button {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-container .content form button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>

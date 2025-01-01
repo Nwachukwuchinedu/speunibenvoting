@@ -6,7 +6,8 @@ import axios from 'axios'
  * @returns {Promise} Resolves with user data or throws an error if the token is invalid.
  */
 
-const BASE_URL = 'https://speunibenvotingapi.onrender.com'
+// const BASE_URL = 'https://speunibenvotingapi.onrender.com'
+const BASE_URL = ' http://localhost:5000'
 
 export const getUserData = async () => {
   const token = localStorage.getItem('token')
@@ -20,7 +21,7 @@ export const getUserData = async () => {
         Authorization: `Bearer ${token}`
       }
     })
-    return response.data // Return user data
+    return [response.data, response.status] // Return user data
   } catch (error) {
     console.error('Error fetching user data:', error)
     if (error.response && error.response.status === 401) {
