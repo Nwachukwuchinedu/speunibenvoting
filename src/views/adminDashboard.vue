@@ -126,6 +126,7 @@ const isOverlayVisible = ref(false)
 // Form state
 const form = ref({
   candidateName: '',
+  positionName: '',
   file: null,
   candidateId: null,
   positionId: null
@@ -146,6 +147,7 @@ function openUpdateForm(candidateId, positionId) {
     form.value.candidateName = candidate.name
     form.value.candidateId = candidate._id
     form.value.positionId = position._id
+    form.value.positionName = position.name
     isOverlayVisible.value = true // Show the overlay
 
     ids.value.candidateId = candidate._id
@@ -161,6 +163,7 @@ function hideOverlay() {
   isOverlayVisible.value = false
   form.value = {
     candidateName: '',
+    positionName: '',
     file: null,
     candidateId: null,
     positionId: null
@@ -237,7 +240,7 @@ const filteredUsers = computed(() => {
       user.matno.toLowerCase().includes(searchQuery.value.toLowerCase())
 
     const matchesLevel =
-      selectedLevel.value === 'none' || user.level === Number(selectedLevel.value);
+      selectedLevel.value === 'none' || user.level === Number(selectedLevel.value)
     return matchesSearch && matchesLevel
   })
 })
@@ -265,7 +268,9 @@ const filteredUsers = computed(() => {
 
     <!-- Main Content -->
     <main class="content">
-      <h2 v-if="userData && userData.nickname">Welcome, {{ userData.nickname }}!</h2>
+      <h2 v-if="userData && userData.nickname" class="greetings">
+        Welcome, {{ userData.nickname }}!
+      </h2>
       <div class="actions">
         <div class="action-wrap">
           <h2 class="action-title">Timer</h2>
@@ -359,7 +364,7 @@ const filteredUsers = computed(() => {
                 <!-- X Button -->
                 <div class="close-icon" @click="hideOverlay">×</div>
 
-                <form class="add-candidate" @submit.prevent="updateCandidate">
+                <form class="add-candidate" @submit.prevent="updateCandidate" :readonly="true">
                   <div class="control">
                     <input type="text" v-model="form.positionName" placeholder="Position Name" />
                   </div>
@@ -394,7 +399,7 @@ const filteredUsers = computed(() => {
               />
             </div>
             <div class="action-item">
-              <select name="level" v-model="selectedLevel">
+              <select name="level" v-model="selectedLevel" class="custom-select">
                 <option value="none">None</option>
                 <option value="100">100</option>
                 <option value="200">200</option>
@@ -437,21 +442,16 @@ const filteredUsers = computed(() => {
 </template>
 
 <style scoped>
-/* Global Styles */
-body {
-  font-family: 'Public Sans', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f9f9f9;
-  color: #0e141b;
+.greetings {
+  font-family: 'Poppins', sans-serif;
+  color: #222;
 }
-
 /* Navbar Styles */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #1980e6;
+  background-color: #000;
   color: white;
   padding: 1rem;
 }
@@ -465,6 +465,7 @@ body {
 .brand {
   font-size: 1.5rem;
   font-weight: bold;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Offcanvas Menu Styles */
@@ -554,6 +555,11 @@ body {
   margin: 20px;
 }
 
+.action-item.img h4 {
+  font-family: 'Poppins', sans-serif;
+  color: #222;
+}
+
 .action-item.img .img {
   width: 150px;
   height: 150px;
@@ -561,9 +567,11 @@ body {
 }
 
 .action-item.img .img img {
-  height: 100%;
-  width: 100%;
-  object-position: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 20px 10px;
+  object-fit: cover;
 }
 
 .action-item.table {
@@ -573,15 +581,25 @@ body {
 
 .action-title {
   padding: 5px;
+  font-family: 'Poppins', sans-serif;
+  color: #222;
 }
+
 .action-item h3 {
-  margin-top: 0;
+  font-family: 'Montserrat', sans-serif;
+  padding: 2px;
+  color: #222;
+}
+
+.action-item p {
+  padding-bottom: 8px;
 }
 .action-item button {
-  background-color: #1980e6;
+  background-color: var(--blue);
+  font-family: 'Poppins', sans-serif;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.7rem 1rem;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -614,13 +632,18 @@ th,
 td {
   border: 1px solid #ddd;
   padding: 0.75rem;
+  color: #222;
 }
 
 th {
   background-color: #f4f4f4;
   font-weight: bold;
+  font-family: 'Poppins', sans-serif;
 }
 
+td {
+  font-family: 'Montserrat', sans-serif;
+}
 tr:nth-child(even) {
   background-color: #f9f9f9;
 }
@@ -742,5 +765,44 @@ button {
   color: white;
   margin-top: 10px;
   width: 100%;
+}
+
+.custom-select {
+  appearance: none; /* Remove default styles */
+  -webkit-appearance: none; /* For Safari */
+  -moz-appearance: none; /* For Firefox */
+  background-color: #f4f4f4; /* Light gray background */
+  color: #333; /* Dark text color */
+  font-size: 16px;
+  padding: 12px 16px;
+  border: 1px solid #ddd; /* Light border */
+  border-radius: 8px; /* Rounded corners */
+  outline: none; /* Remove focus outline */
+  width: 100%; /* Full-width */
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth transition for hover effects */
+  background: #f4f4f4
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><polygon points="0,0 10,0 5,5" style="fill:%23333;"/></svg>')
+    no-repeat right 16px center;
+  background-size: 12px;
+}
+
+.custom-select:hover {
+  background-color: #e8e8e8; /* Slightly darker background */
+  border-color: #ccc; /* Darker border on hover */
+}
+
+.custom-select:focus {
+  border-color: #007bff; /* Blue border on focus */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Subtle shadow */
+}
+
+.custom-select option {
+  background-color: #fff; /* White background for options */
+  color: #333; /* Dark text color for options */
+}
+
+.custom-select option:hover {
+  background-color: #f0f0f0; /* Highlight hovered option */
 }
 </style>
