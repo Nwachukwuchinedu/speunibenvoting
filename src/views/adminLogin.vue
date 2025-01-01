@@ -29,7 +29,7 @@ const formData = ref({
 const submitForm = async () => {
   try {
     const response = await axios.post(
-      'https://speunibenvotingapi.onrender.com/api/admin/login',
+      ' http://localhost:5000/api/admin/login',
       formData.value
     )
     const token = response.data.token
@@ -57,7 +57,7 @@ const submitForm = async () => {
       </div>
       <form @submit.prevent="submitForm">
         <div class="control">
-          <input type="email" placeholder="School email" v-model="formData.email" />
+          <input type="email" placeholder="Email" v-model="formData.email" />
         </div>
 
         <div class="control password">
