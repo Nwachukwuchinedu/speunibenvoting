@@ -2,6 +2,9 @@
 // For the hamburger menu for small screen
 import { ref, onMounted } from 'vue'
 import { getUserData } from '@/axios/user'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const isActive = ref(false)
 const userData = ref(null)
@@ -26,6 +29,15 @@ onMounted(async () => {
     console.error(error)
   }
 })
+
+const logout = () => {
+  // Clear user data (e.g., token or session storage)
+  localStorage.removeItem('token'); // Assuming you're storing the token in sessionStorage
+  auth.value = false; // Update the auth state
+
+  // Redirect to the login page or home page
+  router.push('/login');
+};
 </script>
 
 <template>
@@ -37,7 +49,7 @@ onMounted(async () => {
       <i class="fa-solid fa-bars fa-2x" @click="toggleClass"></i>
     </div>
     <ul v-if="auth">
-      <li><router-link to="/login">Logout</router-link></li>
+      <li><a @click="logout">LogOut</a></li>
     </ul>
     <ul v-else>
       <li><router-link to="/">Home</router-link></li>
@@ -165,4 +177,10 @@ onMounted(async () => {
     display: block;
   }
 }
+
+a{
+  cursor: pointer;
+}
+
+
 </style>
