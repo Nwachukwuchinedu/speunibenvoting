@@ -52,16 +52,6 @@ button:focus {
     color: var(--w-grey) !important;
 }
 
-.error {
-    font-family: 'Montserrat';
-    padding: 10px;
-    background: #fff;
-    display: inline-block;
-    box-shadow: var(--sdw-1);
-    width: 100%;
-    border-bottom: 1px solid red;
-    transform: translateY(-10px);
-    visibility: hidden;
-    opacity: 0;
-    transition: all 0.2s linear;
+button{
+    border-radius: 8px;
 }
