@@ -1,6 +1,11 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue'
-import { getUserData, fetchAllPositions, checkIfUserHasVoted, sendVerificationEmailFunc } from '@/axios/user'
+import {
+  getUserData,
+  fetchAllPositions,
+  checkIfUserHasVoted,
+  sendVerificationEmailFunc
+} from '@/axios/user'
 import { onMounted, ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -13,11 +18,16 @@ const selectedVotes = ref({})
 const votedCandidates = ref({})
 const hasVotedData = ref(null)
 const isLoading = ref(true)
+const showOverlay = ref(false);
+
+const backendURI = 'http://localhost:5000'
+
 
 onMounted(async () => {
   try {
     const user = await getUserData()
-    userData.value = user
+
+    userData.value = user[0]
     console.log(userData.value)
 
     const hasVoted = await checkIfUserHasVoted(userData.value.matno)
@@ -101,10 +111,11 @@ const handleVote = (positionName, candidateId) => {
 }
 
 // Submit vote data
+// Your previous submitVote logic with overlay integration
 const submitVote = async () => {
   if (!userData.value) {
-    console.error('User not logged in')
-    return
+    console.error('User not logged in');
+    return;
   }
 
   // Prepare the vote data
@@ -114,32 +125,46 @@ const submitVote = async () => {
       return {
         position: positionName,
         candidateId: selectedVotes.value[positionName]
-      }
+      };
     })
-  }
+  };
 
   try {
+    isLoading.value = true;
     const response = await axios.post('http://localhost:5000/api/vote/cast', voteData, {
       headers: {
         'Content-Type': 'application/json'
       }
-    })
-    console.log(selectedVotes.value)
-
-    console.log('Vote successfully cast:', response.data)
+    });
+    showOverlay.value = false; // Close the overlay after vote submission
+    console.log('Vote successfully cast:', response.data);
   } catch (error) {
-    console.error('Error submitting vote:', error)
+    console.error('Error submitting vote:', error);
+  } finally {
+    isLoading.value = false;
   }
-}
+};
 
-const sendVerificationEmail = async()=>{
-  try{
+
+// Confirm vote action
+const confirmVote = (confirm) => {
+  if (confirm) {
+    submitVote(); // Proceed with submitting the vote
+  } else {
+    showOverlay.value = false; // Close the overlay without submitting
+  }
+};
+
+const sendVerificationEmail = async () => {
+  try {
     const userData = await getUserData()
     await sendVerificationEmailFunc(userData?.email)
-  }catch(err){
-    console.log(err);
+  } catch (err) {
+    console.log(err)
   }
 }
+
+
 </script>
 
 <template>
@@ -149,7 +174,7 @@ const sendVerificationEmail = async()=>{
   <div v-if="userData && !userData.verified" class="container">
     <div class="welcome">
       <h1 v-if="userData && userData.nickname" class="welcome-text">
-        Hello, {{userData.nickname}}!
+        Hello, {{ userData.nickname }}!
       </h1>
       <p>
         You have not verified your email address. Please verify your email address before casting
@@ -169,7 +194,7 @@ const sendVerificationEmail = async()=>{
       </p>
     </div>
 
-    <div class="end">
+    <!-- <div class="end">
       <h2>Election Ends in:</h2>
       <div class="time-container">
         <div class="card">
@@ -189,68 +214,78 @@ const sendVerificationEmail = async()=>{
           <p class="text">Seconds</p>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="candidates">
-      <form @submit.prevent="submitVote">
-        <h1>Candidates</h1>
-        <div class="list">
-          <div class="card" v-for="position in updatedPositions" :key="position._id">
-            <h2 class="title">{{ position.name }}</h2>
-            <div class="inner">
-              <div v-for="candidate in position.candidates" :key="candidate._id">
-                <!-- Candidate Details -->
-                <img :src="candidate.filePath" alt="Candidate Picture" />
-                <h3>{{ candidate.name }}</h3>
+    <form @submit.prevent="submitVote">
+    <h1>Candidates</h1>
+    <div class="list">
+      <div class="card" v-for="position in updatedPositions" :key="position._id">
+        <h2 class="title">{{ position.name }}</h2>
+        <div class="inner">
+          <div v-for="candidate in position.candidates" :key="candidate._id">
+            <!-- Candidate Details -->
+            <img :src="`${backendURI}/${candidate.picture}`" alt="Candidate Picture" />
+            <h3>{{ candidate.name }}</h3>
 
-                <!-- Hidden Radio Button -->
-                <input
-                  type="radio"
-                  :name="position.name"
-                  :value="candidate._id"
-                  v-model="selectedVotes[position.name]"
-                  class="hidden-radio"
-                />
+            <!-- Hidden Radio Button -->
+            <input
+              type="radio"
+              :name="position.name"
+              :value="candidate._id"
+              v-model="selectedVotes[position.name]"
+              class="hidden-radio"
+            />
 
-                <!-- Vote Button -->
-                <button v-if="isLoading">
-                  <p>Loading...</p>
-                </button>
-                <button
-                  v-else
-                  type="button"
-                  :disabled="hasVotedData?.hasVoted || isVoted(position.name, candidate._id)"
-                  :class="{
-                    'voted-button': isVoted(position.name, candidate._id),
-                    'vote-button': !isVoted(position.name, candidate._id),
-                    'disabled-button': hasVotedData?.hasVoted
-                  }"
-                  @click="handleVote(position.name, candidate._id)"
-                >
-                  {{
-                    hasVotedData?.hasVoted
-                      ? 'Voted'
-                      : isVoted(position.name, candidate._id)
-                        ? 'Voted'
-                        : 'Vote'
-                  }}
-                </button>
-              </div>
-            </div>
+            <!-- Vote Button -->
+            <button v-if="isLoading">
+              <p>Loading...</p>
+            </button>
+            <button
+              v-else
+              type="button"
+              :disabled="hasVotedData?.hasVoted || isVoted(position.name, candidate._id)"
+              :class="{
+                'voted-button': isVoted(position.name, candidate._id),
+                'vote-button': !isVoted(position.name, candidate._id),
+                'disabled-button': hasVotedData?.hasVoted
+              }"
+              @click="handleVote(position.name, candidate._id)"
+            >
+              {{
+                hasVotedData?.hasVoted
+                  ? 'Voted'
+                  : isVoted(position.name, candidate._id)
+                    ? 'Voted'
+                    : 'Vote'
+              }}
+            </button>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Final Vote Submission -->
-        <button
-          type="submit"
-          :disabled="hasVotedData?.hasVoted"
-          :class="{
-            'disabled-button': hasVotedData?.hasVoted
-          }"
-        >
-          {{ hasVotedData?.hasVoted ? 'Voted' : 'SubmitVote' }}
-        </button>
-      </form>
+    <!-- Final Vote Submission -->
+    <button
+      type="button"
+      :disabled="hasVotedData?.hasVoted"
+      :class="{
+        'disabled-button': hasVotedData?.hasVoted
+      }"
+      @click="showOverlay = true"
+    >
+      {{ hasVotedData?.hasVoted ? 'Voted' : 'SubmitVote' }}
+    </button>
+  </form>
+
+  <!-- Overlay for confirmation -->
+  <div v-if="showOverlay" class="overlay">
+    <div class="overlay-content">
+      <h2>Do you want to cast your vote?</h2>
+      <button @click="confirmVote(true)" class="yes">Yes</button>
+      <button @click="confirmVote(false)" class="no">No</button>
+    </div>
+  </div>
     </div>
   </div>
 </template>
@@ -406,7 +441,7 @@ const sendVerificationEmail = async()=>{
 }
 
 .candidates button.vote-button {
-  background-color: blue;
+  background-color: var(--blue);
   color: white;
   padding: 0.5em 1em;
   border: none;
@@ -518,5 +553,55 @@ const sendVerificationEmail = async()=>{
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+.verify {
+  padding: 10px;
+  margin-top: 15px;
+  cursor: pointer;
+  font-family: 'Poppins';
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.overlay button {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.overlay h2{
+  font-family: 'Montserrat', sans-serif;
+  color:#222;
+}
+.overlay button:hover {
+  background-color: #0056b3;
+}
+
+.yes{
+  background: green !important;
+}
+.no{
+  background: red !important;
 }
 </style>
