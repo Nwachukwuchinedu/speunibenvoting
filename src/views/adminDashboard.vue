@@ -244,6 +244,130 @@ const filteredUsers = computed(() => {
     return matchesSearch && matchesLevel
   })
 })
+
+// Timer state
+const timer = ref(null)
+const countdown = ref('')
+const intervalId = ref(null)
+
+// Inputs for setting the timer
+const startTime = ref('')
+const endTime = ref('')
+const message = ref('')
+
+// Fetch Timer Status
+const fetchTimerStatus = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/timer/status')
+    timer.value = response.data.timer
+
+    if (timer.value.isActive && !timer.value.isStoppedManually) {
+      startCountdown()
+    } else if (timer.value.isStoppedManually) {
+      message.value = 'Election has been stopped manually.'
+    } else {
+      message.value = 'Election has not started yet.'
+    }
+  } catch (error) {
+    console.error('Error fetching timer status:', error)
+    message.value = 'Failed to fetch timer status.'
+  }
+}
+
+// Set Timer
+const setElectionTimer = async () => {
+  try {
+    const now = new Date()
+    const start = new Date(startTime.value)
+
+    await axios.post('http://localhost:5000/api/timer/set-timer', {
+      startTime: start,
+      endTime: new Date(endTime.value)
+    })
+
+    if (start > now) {
+      message.value = 'Starting in 00:01:21' // Example countdown logic
+      const startDiff = Math.max(0, start - now)
+      countdown.value = formatCountdown(startDiff)
+      const countdownInterval = setInterval(() => {
+        const remaining = Math.max(0, start - new Date())
+        countdown.value = formatCountdown(remaining)
+        if (remaining <= 0) {
+          clearInterval(countdownInterval)
+          startElection()
+        }
+      }, 1000)
+    } else {
+      message.value = 'Timer set successfully.'
+    }
+
+    fetchTimerStatus()
+  } catch (error) {
+    console.error('Error setting timer:', error)
+    message.value = 'Failed to set timer.'
+  }
+}
+
+// Start Election
+const startElection = async () => {
+  try {
+    await axios.post('http://localhost:5000/api/timer/start-election')
+    message.value = 'Election started successfully.'
+    fetchTimerStatus()
+  } catch (error) {
+    console.error('Error starting election:', error)
+    message.value = 'Failed to start election.'
+  }
+}
+
+// Stop Election
+const stopElection = async () => {
+  try {
+    await axios.post('http://localhost:5000/api/timer/stop-election')
+    message.value = 'Election stopped successfully.'
+    fetchTimerStatus()
+  } catch (error) {
+    console.error('Error stopping election:', error)
+    message.value = 'Failed to stop election.'
+  }
+}
+
+// Countdown Timer
+const startCountdown = () => {
+  const calculateTimeLeft = () => {
+    const now = new Date()
+    const end = new Date(timer.value.endTime)
+    const diff = end - now
+
+    if (diff <= 0) {
+      countdown.value = 'Election has ended.'
+      clearInterval(intervalId.value)
+
+      // Check to prevent multiple status fetches
+      if (timer.value && !timer.value.hasEnded) {
+        timer.value.hasEnded = true // Mark as ended to prevent repeated fetches
+        stopElection()
+      }
+    } else {
+      countdown.value = formatCountdown(diff)
+    }
+  }
+
+  calculateTimeLeft()
+  intervalId.value = setInterval(calculateTimeLeft, 1000)
+}
+
+const formatCountdown = (ms) => {
+  const hours = Math.floor(ms / (1000 * 60 * 60))
+  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((ms % (1000 * 60)) / 1000)
+
+  return `${hours.toString().padStart(2, '0')}h ${minutes
+    .toString()
+    .padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`
+}
+
+onMounted(fetchTimerStatus)
 </script>
 
 <template>
@@ -275,16 +399,35 @@ const filteredUsers = computed(() => {
         <div class="action-wrap">
           <h2 class="action-title">Timer</h2>
           <div class="action">
-            <div class="action-item">
+            <div v-if="timer" class="action-item">
               <h3>Start/End Election</h3>
               <p>Start the election or end the election</p>
-              <button>Start Election</button>
+              <button @click="startElection" :disabled="timer?.isActive" class="hidden-btn">
+                Start Election
+              </button>
+              <button @click="stopElection" :disabled="!timer?.isActive" class="hidden-btn">
+                Stop Election
+              </button>
+              <p style="color: green;">{{ message }}</p>
+              <p v-if="timer.isActive && !timer.isStoppedManually" class="contdown-time">{{ countdown }}</p>
             </div>
-            <!-- <div class="action-item">
+            <div class="action-item">
               <h3>Countdown Timer Settings</h3>
               <p>Set the countdown timer for the election</p>
-              <button>Open</button>
-            </div> -->
+              <input
+                type="datetime-local"
+                v-model="startTime"
+                placeholder="Start Time"
+                class="styled-input"
+              />
+              <input
+                type="datetime-local"
+                v-model="endTime"
+                placeholder="End Time"
+                class="styled-input"
+              />
+              <button @click="setElectionTimer" class="set-timer">Set Timer</button>
+            </div>
           </div>
         </div>
 
@@ -322,24 +465,6 @@ const filteredUsers = computed(() => {
         </div>
         <div class="action-wrap">
           <h2 class="action-title">Manage Candidates</h2>
-          <!-- 
-          <div class="action candidate-action">
-            <div v-for="position in positions" :key="position.id" class="action-content">
-              <div
-                v-for="candidate in position.candidates"
-                :key="candidate.id"
-                class="action-item img"
-              >
-                <div class="three-dot">:</div>
-                <div class="img">
-                  <img :src="`${backendURI}/${candidate.picture}`" :alt="candidate.name" />
-                </div>
-                <h4>{{ candidate.name }}</h4>
-                <p>{{ position.name }}</p>
-              </div>
-            </div>
-          </div> -->
-
           <div>
             <div class="action candidate-action">
               <div v-for="position in positions" :key="position.id" class="action-content">
@@ -445,6 +570,40 @@ const filteredUsers = computed(() => {
 .greetings {
   font-family: 'Poppins', sans-serif;
   color: #222;
+}
+.set-timer {
+  margin-top: 10px;
+}
+.contdown-time{
+  font-weight: 600;
+  font-size: clamp(1em, 2vw, 2em);
+}
+
+.styled-input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.styled-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+  outline: none;
+}
+
+.hidden-btn {
+  visibility: hidden;
+  height: 0 !important;
+  padding: 0 !important;
 }
 /* Navbar Styles */
 .navbar {
