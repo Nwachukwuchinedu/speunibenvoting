@@ -11,6 +11,7 @@ const startTime = ref('')
 const endTime = ref('')
 const message = ref('')
 
+let hasEnded = false
 // Fetch Timer Status
 export const fetchTimerStatus = async () => {
   try {
@@ -95,18 +96,18 @@ const startCountdown = () => {
     const end = new Date(timer.value.endTime)
     const diff = end - now
 
-    if (diff <= 0) {
-      countdown.value = 'Election has ended.'
-      clearInterval(intervalId.value)
+   if (diff <= 0) {
+     countdown.value = 'Election has ended.'
+     clearInterval(intervalId.value)
 
-      // Check to prevent multiple status fetches
-      if (timer.value && !timer.value.hasEnded) {
-        timer.value.hasEnded = true // Mark as ended to prevent repeated fetches
-        stopElection()
-      }
-    } else {
-      countdown.value = formatCountdown(diff)
-    }
+     if (!hasEnded) {
+       hasEnded = true
+       stopElection()
+     }
+   } else {
+     countdown.value = formatCountdown(diff)
+   }
+
   }
 
   calculateTimeLeft()
