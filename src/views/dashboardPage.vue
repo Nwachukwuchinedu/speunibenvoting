@@ -9,7 +9,10 @@ import {
 import { onMounted, ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { countdownItems, fetchTimerStatus } from '@/utils/countdown'
 
+
+fetchTimerStatus
 const router = useRouter()
 
 const userData = ref(null)
@@ -18,10 +21,17 @@ const selectedVotes = ref({})
 const votedCandidates = ref({})
 const hasVotedData = ref(null)
 const isLoading = ref(true)
-const showOverlay = ref(false);
+const showOverlay = ref(false)
 
 const backendURI = 'http://localhost:5000'
 
+const timerItems = countdownItems()
+const countdown = timerItems.countdown
+const timer = timerItems.timer
+
+console.log(timerItems)
+
+onMounted(fetchTimerStatus)
 
 onMounted(async () => {
   try {
@@ -114,8 +124,8 @@ const handleVote = (positionName, candidateId) => {
 // Your previous submitVote logic with overlay integration
 const submitVote = async () => {
   if (!userData.value) {
-    console.error('User not logged in');
-    return;
+    console.error('User not logged in')
+    return
   }
 
   // Prepare the vote data
@@ -125,35 +135,34 @@ const submitVote = async () => {
       return {
         position: positionName,
         candidateId: selectedVotes.value[positionName]
-      };
+      }
     })
-  };
+  }
 
   try {
-    isLoading.value = true;
+    isLoading.value = true
     const response = await axios.post('http://localhost:5000/api/vote/cast', voteData, {
       headers: {
         'Content-Type': 'application/json'
       }
-    });
-    showOverlay.value = false; // Close the overlay after vote submission
-    console.log('Vote successfully cast:', response.data);
+    })
+    showOverlay.value = false // Close the overlay after vote submission
+    console.log('Vote successfully cast:', response.data)
   } catch (error) {
-    console.error('Error submitting vote:', error);
+    console.error('Error submitting vote:', error)
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
-};
-
+}
 
 // Confirm vote action
 const confirmVote = (confirm) => {
   if (confirm) {
-    submitVote(); // Proceed with submitting the vote
+    submitVote() // Proceed with submitting the vote
   } else {
-    showOverlay.value = false; // Close the overlay without submitting
+    showOverlay.value = false // Close the overlay without submitting
   }
-};
+}
 
 const sendVerificationEmail = async () => {
   try {
@@ -163,6 +172,7 @@ const sendVerificationEmail = async () => {
     console.log(err)
   }
 }
+
 
 
 </script>
@@ -194,100 +204,105 @@ const sendVerificationEmail = async () => {
       </p>
     </div>
 
-    <!-- <div class="end">
-      <h2>Election Ends in:</h2>
-      <div class="time-container">
-        <div class="card">
+    <div v-if="timer" class="end">
+      <h2 v-if="timer.isActive && !timer.isStoppedManually">Election Ends in:</h2>
+      <div v-if="timer.isActive && !timer.isStoppedManually" class="time-container">
+        <!-- <div class="card">
           <div class="time">01</div>
           <p class="text">Days</p>
-        </div>
+        </div> -->
         <div class="card">
-          <div class="time">12</div>
+          <div class="time">{{ countdown[0] }}{{ countdown[1] }}</div>
           <p class="text">Hours</p>
         </div>
         <div class="card">
-          <div class="time">01</div>
+          <div class="time">{{ countdown[4] }}{{ countdown[5] }}</div>
           <p class="text">Minutes</p>
         </div>
         <div class="card">
-          <div class="time">40</div>
+          <div class="time">{{ countdown[8] }}{{ countdown[9] }}</div>
           <p class="text">Seconds</p>
         </div>
       </div>
-    </div> -->
+    </div>
 
     <div class="candidates">
-    <form @submit.prevent="submitVote">
-    <h1>Candidates</h1>
-    <div class="list">
-      <div class="card" v-for="position in updatedPositions" :key="position._id">
-        <h2 class="title">{{ position.name }}</h2>
-        <div class="inner">
-          <div v-for="candidate in position.candidates" :key="candidate._id">
-            <!-- Candidate Details -->
-            <img :src="`${backendURI}/${candidate.picture}`" alt="Candidate Picture" />
-            <h3>{{ candidate.name }}</h3>
+      <form @submit.prevent="submitVote">
+        <h1>Candidates</h1>
+        <div class="list">
+          <div class="card" v-for="position in updatedPositions" :key="position._id">
+            <h2 class="title">{{ position.name }}</h2>
+            <div class="inner">
+              <div v-for="candidate in position.candidates" :key="candidate._id">
+                <!-- Candidate Details -->
+                <img :src="`${backendURI}/${candidate.picture}`" alt="Candidate Picture" />
+                <h3>{{ candidate.name }}</h3>
 
-            <!-- Hidden Radio Button -->
-            <input
-              type="radio"
-              :name="position.name"
-              :value="candidate._id"
-              v-model="selectedVotes[position.name]"
-              class="hidden-radio"
-            />
+                <!-- Hidden Radio Button -->
+                <input
+                  type="radio"
+                  :name="position.name"
+                  :value="candidate._id"
+                  v-model="selectedVotes[position.name]"
+                  class="hidden-radio"
+                />
 
-            <!-- Vote Button -->
-            <button v-if="isLoading">
-              <p>Loading...</p>
-            </button>
-            <button
-              v-else
-              type="button"
-              :disabled="hasVotedData?.hasVoted || isVoted(position.name, candidate._id)"
-              :class="{
-                'voted-button': isVoted(position.name, candidate._id),
-                'vote-button': !isVoted(position.name, candidate._id),
-                'disabled-button': hasVotedData?.hasVoted
-              }"
-              @click="handleVote(position.name, candidate._id)"
-            >
-              {{
-                hasVotedData?.hasVoted
-                  ? 'Voted'
-                  : isVoted(position.name, candidate._id)
-                    ? 'Voted'
-                    : 'Vote'
-              }}
-            </button>
+                <!-- Vote Button -->
+                <button v-if="isLoading">
+                  <p>Loading...</p>
+                </button>
+                <button
+                  v-else-if="!isLoading && timer.isActive"
+                  type="button"
+                  :disabled="hasVotedData?.hasVoted || isVoted(position.name, candidate._id)"
+                  :class="{
+                    'voted-button': isVoted(position.name, candidate._id),
+                    'vote-button': !isVoted(position.name, candidate._id),
+                    'disabled-button': hasVotedData?.hasVoted
+                  }"
+                  @click="handleVote(position.name, candidate._id)"
+                >
+                  {{
+                    hasVotedData?.hasVoted
+                      ? 'Voted'
+                      : isVoted(position.name, candidate._id)
+                        ? 'Voted'
+                        : 'Vote'
+                  }}
+                </button>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <!-- Final Vote Submission -->
+        <button v-if="isLoading" style="padding: 0; background: #fff"></button>
+        <button
+          v-else-if="!isLoading && timer.isActive"
+          type="button"
+          :disabled="hasVotedData?.hasVoted"
+          :class="{
+            'disabled-button': hasVotedData?.hasVoted
+          }"
+          @click="showOverlay = true"
+        >
+          {{ hasVotedData?.hasVoted ? 'Voted' : 'SubmitVote' }}
+        </button>
+      </form>
+
+      <!-- Overlay for confirmation -->
+      <div v-if="showOverlay" class="overlay">
+        <div class="overlay-content">
+          <h2>Do you want to cast your vote?</h2>
+          <button @click="confirmVote(true)" class="yes">Yes</button>
+          <button @click="confirmVote(false)" class="no">No</button>
         </div>
       </div>
     </div>
-
-    <!-- Final Vote Submission -->
-    <button
-      type="button"
-      :disabled="hasVotedData?.hasVoted"
-      :class="{
-        'disabled-button': hasVotedData?.hasVoted
-      }"
-      @click="showOverlay = true"
-    >
-      {{ hasVotedData?.hasVoted ? 'Voted' : 'SubmitVote' }}
-    </button>
-  </form>
-
-  <!-- Overlay for confirmation -->
-  <div v-if="showOverlay" class="overlay">
-    <div class="overlay-content">
-      <h2>Do you want to cast your vote?</h2>
-      <button @click="confirmVote(true)" class="yes">Yes</button>
-      <button @click="confirmVote(false)" class="no">No</button>
-    </div>
   </div>
-    </div>
-  </div>
+
+ 
+
 </template>
 
 <style scoped>
@@ -590,18 +605,18 @@ const sendVerificationEmail = async () => {
   cursor: pointer;
 }
 
-.overlay h2{
+.overlay h2 {
   font-family: 'Montserrat', sans-serif;
-  color:#222;
+  color: #222;
 }
 .overlay button:hover {
   background-color: #0056b3;
 }
 
-.yes{
+.yes {
   background: green !important;
 }
-.no{
+.no {
   background: red !important;
 }
 </style>
