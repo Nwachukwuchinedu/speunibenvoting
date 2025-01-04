@@ -1,9 +1,17 @@
 <script setup>
 // import NavBar from '@/components/NavBar.vue'
 import { getAdminData, fetchAllPositions, fetchAllUsers } from '@/axios/user'
-import { onMounted, ref, computed, watch } from 'vue'
+import { onMounted, ref, computed, watch, nextTick } from 'vue'
+import Chart from 'chart.js/auto'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import {
+  countdownItems,
+  fetchTimerStatus,
+  setElectionTimer,
+  startElection,
+  stopElection
+} from '@/utils/countdown'
 
 const router = useRouter()
 
@@ -11,6 +19,17 @@ const userData = ref(null)
 const positions = ref([])
 const allUsersData = ref([])
 const backendURI = 'http://localhost:5000'
+
+const timerItems = countdownItems()
+const countdown = timerItems.countdown
+const timer = timerItems.timer
+const message = timerItems.message
+const startTime = timerItems.startTime
+const endTime = timerItems.endTime
+
+console.log(timerItems)
+
+onMounted(fetchTimerStatus)
 
 onMounted(async () => {
   try {
@@ -245,129 +264,83 @@ const filteredUsers = computed(() => {
   })
 })
 
-// Timer state
-const timer = ref(null)
-const countdown = ref('')
-const intervalId = ref(null)
+// Store the fetched data
+const chartData = ref([])
 
-// Inputs for setting the timer
-const startTime = ref('')
-const endTime = ref('')
-const message = ref('')
-
-// Fetch Timer Status
-const fetchTimerStatus = async () => {
+// Fetch data from API endpoint
+onMounted(async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/timer/status')
-    timer.value = response.data.timer
+    const response = await axios.get('http://localhost:5000/api/vote/result') // Replace with your actual API endpoint
+    const apiData = response.data
 
-    if (timer.value.isActive && !timer.value.isStoppedManually) {
-      startCountdown()
-    } else if (timer.value.isStoppedManually) {
-      message.value = 'Election has been stopped manually.'
-    } else {
-      message.value = 'Election has not started yet.'
-    }
-  } catch (error) {
-    console.error('Error fetching timer status:', error)
-    message.value = 'Failed to fetch timer status.'
-  }
-}
+    // Transform the API data for Chart.js
+    chartData.value = apiData.map((item) => ({
+      position: item.position,
+      candidates: item.results.map((result) => result.candidate),
+      votes: item.results.map((result) => result.votes)
+    }))
 
-// Set Timer
-const setElectionTimer = async () => {
-  try {
-    const now = new Date()
-    const start = new Date(startTime.value)
-
-    await axios.post('http://localhost:5000/api/timer/set-timer', {
-      startTime: start,
-      endTime: new Date(endTime.value)
-    })
-
-    if (start > now) {
-      message.value = 'Starting in 00:01:21' // Example countdown logic
-      const startDiff = Math.max(0, start - now)
-      countdown.value = formatCountdown(startDiff)
-      const countdownInterval = setInterval(() => {
-        const remaining = Math.max(0, start - new Date())
-        countdown.value = formatCountdown(remaining)
-        if (remaining <= 0) {
-          clearInterval(countdownInterval)
-          startElection()
+    // Render the charts after the DOM is updated
+    await nextTick() // Ensure all canvas elements are rendered
+    chartData.value.forEach((data, index) => {
+      const ctx = document.getElementById(`chart-${index}`)
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.candidates,
+          datasets: [
+            {
+              label: 'Votes',
+              data: data.votes,
+              backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726'], // Dynamic colors
+              borderColor: '#ccc',
+              borderWidth: 1,
+              hoverBackgroundColor: ['#1E88E5', '#43A047', '#FB8C00'] // Hover effect
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => `${context.dataset.label}: ${context.raw} votes`
+              }
+            }
+          },
+          animation: {
+            duration: 1000, // Smooth animations
+            easing: 'easeOutBounce'
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Candidates',
+                font: { weight: 'bold' }
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Votes',
+                font: { weight: 'bold' }
+              },
+              ticks: {
+                precision: 0
+              }
+            }
+          }
         }
-      }, 1000)
-    } else {
-      message.value = 'Timer set successfully.'
-    }
-
-    fetchTimerStatus()
+      })
+    })
   } catch (error) {
-    console.error('Error setting timer:', error)
-    message.value = 'Failed to set timer.'
+    console.error('Error fetching data:', error)
   }
-}
-
-// Start Election
-const startElection = async () => {
-  try {
-    await axios.post('http://localhost:5000/api/timer/start-election')
-    message.value = 'Election started successfully.'
-    fetchTimerStatus()
-  } catch (error) {
-    console.error('Error starting election:', error)
-    message.value = 'Failed to start election.'
-  }
-}
-
-// Stop Election
-const stopElection = async () => {
-  try {
-    await axios.post('http://localhost:5000/api/timer/stop-election')
-    message.value = 'Election stopped successfully.'
-    fetchTimerStatus()
-  } catch (error) {
-    console.error('Error stopping election:', error)
-    message.value = 'Failed to stop election.'
-  }
-}
-
-// Countdown Timer
-const startCountdown = () => {
-  const calculateTimeLeft = () => {
-    const now = new Date()
-    const end = new Date(timer.value.endTime)
-    const diff = end - now
-
-    if (diff <= 0) {
-      countdown.value = 'Election has ended.'
-      clearInterval(intervalId.value)
-
-      // Check to prevent multiple status fetches
-      if (timer.value && !timer.value.hasEnded) {
-        timer.value.hasEnded = true // Mark as ended to prevent repeated fetches
-        stopElection()
-      }
-    } else {
-      countdown.value = formatCountdown(diff)
-    }
-  }
-
-  calculateTimeLeft()
-  intervalId.value = setInterval(calculateTimeLeft, 1000)
-}
-
-const formatCountdown = (ms) => {
-  const hours = Math.floor(ms / (1000 * 60 * 60))
-  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))
-  const seconds = Math.floor((ms % (1000 * 60)) / 1000)
-
-  return `${hours.toString().padStart(2, '0')}h ${minutes
-    .toString()
-    .padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`
-}
-
-onMounted(fetchTimerStatus)
+})
 </script>
 
 <template>
@@ -402,14 +375,18 @@ onMounted(fetchTimerStatus)
             <div v-if="timer" class="action-item">
               <h3>Start/End Election</h3>
               <p>Start the election or end the election</p>
+
+              <p style="color: green">{{ message }}</p>
+              <p v-if="timer.isActive && !timer.isStoppedManually" class="contdown-time">
+                {{ countdown }}
+              </p>
+
               <button @click="startElection" :disabled="timer?.isActive" class="hidden-btn">
                 Start Election
               </button>
-              <button @click="stopElection" :disabled="!timer?.isActive" class="hidden-btn">
+              <button @click="stopElection" :disabled="!timer?.isActive" class="not-hidden">
                 Stop Election
               </button>
-              <p style="color: green;">{{ message }}</p>
-              <p v-if="timer.isActive && !timer.isStoppedManually" class="contdown-time">{{ countdown }}</p>
             </div>
             <div class="action-item">
               <h3>Countdown Timer Settings</h3>
@@ -561,6 +538,25 @@ onMounted(fetchTimerStatus)
             </div>
           </div>
         </div>
+        <div class="action-wrap">
+          <h2 class="action-title">Live Results</h2>
+          <div class="action">
+            <!-- Conditional rendering for when chartData is empty -->
+            <div v-if="chartData.length === 0" class="no-data">
+              <p>No data available to display</p>
+            </div>
+
+            <!-- Displaying charts only when chartData is populated -->
+            <div
+              v-for="(data, index) in chartData"
+              :key="index"
+              class="chart-container action-item"
+            >
+              <h3>{{ data.position }}</h3>
+              <canvas :id="'chart-' + index"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -573,8 +569,10 @@ onMounted(fetchTimerStatus)
 }
 .set-timer {
   margin-top: 10px;
+  display: block;
+  width: 100%;
 }
-.contdown-time{
+.contdown-time {
   font-weight: 600;
   font-size: clamp(1em, 2vw, 2em);
 }
@@ -604,6 +602,11 @@ onMounted(fetchTimerStatus)
   visibility: hidden;
   height: 0 !important;
   padding: 0 !important;
+}
+
+.not-hidden {
+  display: block;
+  width: 100%;
 }
 /* Navbar Styles */
 .navbar {
@@ -700,9 +703,9 @@ onMounted(fetchTimerStatus)
   background-color: white;
   border: 1px solid #d0dbe7;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 2rem;
   flex: 1;
-  min-width: 120px;
+  min-width: 250px;
 }
 
 .action-item.img {
