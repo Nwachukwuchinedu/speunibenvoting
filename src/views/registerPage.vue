@@ -28,10 +28,11 @@ const formData = ref({
   password: ''
 })
 
+
 const submitForm = async () => {
   try {
     const response = await axios.post(
-      'https://speunibenvotingapi.onrender.com/api/auth/signup',
+      'http://localhost:5000/api/auth/signup',
       formData.value
     )
     console.log(response.data)

@@ -6,8 +6,7 @@ import axios from 'axios'
  * @returns {Promise} Resolves with user data or throws an error if the token is invalid.
  */
 
-// const BASE_URL = 'https://speunibenvotingapi.onrender.com'
-const BASE_URL = ' http://localhost:5000'
+const apiUrl = import.meta.env.VITE_API_URL
 
 export const getUserData = async () => {
   const token = localStorage.getItem('token')
@@ -16,7 +15,7 @@ export const getUserData = async () => {
   }
 
   try {
-    const response = await axios.get(`${BASE_URL}/api/auth/user/me`, {
+    const response = await axios.get(`${apiUrl}/api/auth/user/me`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -41,7 +40,7 @@ export const getAdminData = async () => {
 
   try {
     const response = await axios.get(
-      `${BASE_URL}/api/admin/me`,
+      `${apiUrl}/api/admin/me`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -62,7 +61,7 @@ export const getAdminData = async () => {
 
 export const fetchAllPositions = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/api/position/all`)
+    const response = await axios.get(`${apiUrl}/api/position/all`)
 
     // Transform the picture paths
     const transformedData = response.data.map((position) => ({
@@ -85,7 +84,7 @@ export const fetchAllPositions = async () => {
 
 export const checkIfUserHasVoted = async (voterId) => {
   try {
-    const response = await axios.post(`${BASE_URL}/api/vote/has-voted`, {
+    const response = await axios.post(`${apiUrl}/api/vote/has-voted`, {
       voterId
     })
 
@@ -104,7 +103,7 @@ export const checkIfUserHasVoted = async (voterId) => {
 
 export const sendVerificationEmailFunc = async (email) => {
   try {
-    const response = await axios.post(`${BASE_URL}/api/auth/verify-email`, { email })
+    const response = await axios.post(`${apiUrl}/api/auth/verify-email`, { email })
     console.log(response)
     return response.data
   } catch (error) {
@@ -115,7 +114,7 @@ export const sendVerificationEmailFunc = async (email) => {
 
 export const fetchAllUsers = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/api/auth/all-users`)
+    const response = await axios.get(`${apiUrl}/api/auth/all-users`)
 
     // Handle the response data
     console.log(response.data) // Logs the fetched data
@@ -126,4 +125,5 @@ export const fetchAllUsers = async () => {
     console.error('Error fetching data:', error)
   }
 }
+
 

@@ -23,7 +23,7 @@ const hasVotedData = ref(null)
 const isLoading = ref(true)
 const showOverlay = ref(false)
 
-const backendURI = 'http://localhost:5000'
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const timerItems = countdownItems()
 const countdown = timerItems.countdown
@@ -235,7 +235,7 @@ const sendVerificationEmail = async () => {
             <div class="inner">
               <div v-for="candidate in position.candidates" :key="candidate._id">
                 <!-- Candidate Details -->
-                <img :src="`${backendURI}/${candidate.picture}`" alt="Candidate Picture" />
+                <img :src="`${apiUrl}/${candidate.picture}`" alt="Candidate Picture" />
                 <h3>{{ candidate.name }}</h3>
 
                 <!-- Hidden Radio Button -->

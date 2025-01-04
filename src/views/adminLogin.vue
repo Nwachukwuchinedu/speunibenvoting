@@ -26,17 +26,33 @@ const formData = ref({
   password: ''
 })
 
+const errorMessage = ref({})
+const loading = ref(false) // Track loading state
+
 const submitForm = async () => {
+  loading.value = true // Start loading
   try {
     const response = await axios.post(
-      ' http://localhost:5000/api/admin/login',
+      'https://speunibenvotingapi.onrender.com/api/admin/login',
       formData.value
     )
     const token = response.data.token
     localStorage.setItem('admin-token', token)
     router.push('/admin-dashboard')
   } catch (error) {
-    console.log(`Errro: ${error}`)
+    // Capture and display API errors
+    if (error.response && error.response.status === 401) {
+      errorMessage.value = error.response.data
+
+      // Automatically clear error messages after 5 seconds
+      setTimeout(() => {
+        errorMessage.value = {}
+      }, 5000)
+    } else {
+      console.error(`Unexpected Error: ${error.message}`)
+    }
+  } finally {
+    loading.value = false // Stop loading
   }
 }
 </script>
@@ -58,11 +74,13 @@ const submitForm = async () => {
       <form @submit.prevent="submitForm">
         <div class="control">
           <input type="email" placeholder="Email" v-model="formData.email" />
+          <small v-if="errorMessage.email" class="error">{{ errorMessage.email }}</small>
         </div>
 
         <div class="control password">
           <input :type="inputType" placeholder="Password" v-model="formData.password" />
           <i :class="eyeIcon" id="eyeSlash" @click="eye_slash"></i>
+          <small v-if="errorMessage.password" class="error">{{ errorMessage.password }}</small>
         </div>
 
         <button>Log In</button>
@@ -89,17 +107,10 @@ const submitForm = async () => {
 }
 
 .form-container .content small.error {
+  color: red;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
   font-family: 'Montserrat';
-  padding: 10px;
-  background: #fff;
-  display: inline-block;
-  box-shadow: var(--sdw-1);
-  width: 100%;
-  border-bottom: 1px solid red;
-  transform: translateY(-10px);
-  visibility: hidden;
-  opacity: 0;
-  transition: all 0.2s linear;
 }
 
 .form-container .content .title h1 {
