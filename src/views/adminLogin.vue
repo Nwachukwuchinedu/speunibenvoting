@@ -83,7 +83,10 @@ const submitForm = async () => {
           <small v-if="errorMessage.password" class="error">{{ errorMessage.password }}</small>
         </div>
 
-        <button>Log In</button>
+        <button :disabled="loading">
+          <span v-if="loading" class="spinner"></span>
+          <span v-else>Log In</span>
+        </button>
       </form>
     </div>
   </div>
