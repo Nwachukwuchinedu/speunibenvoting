@@ -68,7 +68,7 @@ export const fetchAllPositions = async () => {
       ...position,
       candidates: position.candidates.map((candidate) => ({
         ...candidate,
-        picture: candidate.picture.replace(/.*\\public\\/, '../../public/').replace(/\\/g, '/')
+        picture: candidate.picture
       }))
     }))
 
