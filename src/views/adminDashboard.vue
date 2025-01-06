@@ -130,7 +130,7 @@ const addCandidate = async () => {
 
     formData.append('picture', picture.value)
 
-    const response = await axios.post('http://localhost:5000/api/position/add', formData, {
+    const response = await axios.post(`${apiUrl}/candidates`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -202,7 +202,7 @@ async function updateCandidate() {
 
   try {
     const response = await axios.put(
-      `http://localhost:5000/api/position/${positionId}/candidate/${candidateId}/update`,
+      `${apiUrl}/position/${positionId}/candidate/${candidateId}/update`,
       formData,
       {
         headers: {
@@ -240,7 +240,7 @@ async function deleteCandidate() {
 
   try {
     const response = await axios.delete(
-      `http://localhost:5000/api/position/${positionId}/candidate/${candidateId}/delete`
+      `${apiUrl}/position/${positionId}/candidate/${candidateId}/delete`
     )
     console.log('Candidate deleted successfully:', response.data)
   } catch (error) {
