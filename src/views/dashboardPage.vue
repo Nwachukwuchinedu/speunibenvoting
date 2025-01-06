@@ -11,7 +11,6 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { countdownItems, fetchTimerStatus } from '@/utils/countdown'
 
-
 fetchTimerStatus
 const router = useRouter()
 
@@ -23,7 +22,7 @@ const hasVotedData = ref(null)
 const isLoading = ref(true)
 const showOverlay = ref(false)
 
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_API_URL
 
 const timerItems = countdownItems()
 const countdown = timerItems.countdown
@@ -172,9 +171,6 @@ const sendVerificationEmail = async () => {
     console.log(err)
   }
 }
-
-
-
 </script>
 
 <template>
@@ -229,7 +225,10 @@ const sendVerificationEmail = async () => {
     <div class="candidates">
       <form @submit.prevent="submitVote">
         <h1>Candidates</h1>
-        <div class="list">
+        <div v-if="updatedPositions.length === 0" class="list">
+          <p>No candidates has been added yet.</p>
+        </div>
+        <div v-else class="list">
           <div class="card" v-for="position in updatedPositions" :key="position._id">
             <h2 class="title">{{ position.name }}</h2>
             <div class="inner">
@@ -300,9 +299,6 @@ const sendVerificationEmail = async () => {
       </div>
     </div>
   </div>
-
- 
-
 </template>
 
 <style scoped>
