@@ -271,7 +271,7 @@ const chartData = ref([])
 // Fetch data from API endpoint
 onMounted(async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/vote/result') // Replace with your actual API endpoint
+    const response = await axios.get(`${apiUrl}/api/admin/get-election-results`)
     const apiData = response.data
 
     // Transform the API data for Chart.js
