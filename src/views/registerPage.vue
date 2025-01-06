@@ -32,7 +32,7 @@ const formData = ref({
 const submitForm = async () => {
   try {
     const response = await axios.post(
-      'http://localhost:5000/api/auth/signup',
+      'https://speunibenvotingapi.onrender.com/api/auth/register',
       formData.value
     )
     console.log(response.data)

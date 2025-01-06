@@ -18,7 +18,8 @@ const router = useRouter()
 const userData = ref(null)
 const positions = ref([])
 const allUsersData = ref([])
-const backendURI = 'http://localhost:5000'
+const apiUrl = import.meta.env.VITE_API_URL;
+
 
 const timerItems = countdownItems()
 const countdown = timerItems.countdown
@@ -452,7 +453,7 @@ onMounted(async () => {
                 >
                   <div class="three-dot" @click="openUpdateForm(candidate.id, position.id)">:</div>
                   <div class="img">
-                    <img :src="`${backendURI}/${candidate.picture}`" :alt="candidate.name" />
+                    <img :src="`${apiUrl}/${candidate.picture}`" :alt="candidate.name" />
                   </div>
                   <h4>{{ candidate.name }}</h4>
                   <p>{{ position.name }}</p>

@@ -10,12 +10,13 @@ const intervalId = ref(null)
 const startTime = ref('')
 const endTime = ref('')
 const message = ref('')
+const apiUrl = import.meta.env.VITE_API_URL
 
 let hasEnded = false
 // Fetch Timer Status
 export const fetchTimerStatus = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/timer/status')
+    const response = await axios.get(`${apiUrl}/api/timer/status`)
     timer.value = response.data.timer
 
     if (timer.value.isActive && !timer.value.isStoppedManually) {
@@ -37,7 +38,7 @@ export const setElectionTimer = async () => {
     const now = new Date()
     const start = new Date(startTime.value)
 
-    await axios.post('http://localhost:5000/api/timer/set-timer', {
+    await axios.post(`${apiUrl}/api/timer/set-timer`, {
       startTime: start,
       endTime: new Date(endTime.value)
     })
@@ -68,7 +69,7 @@ export const setElectionTimer = async () => {
 // Start Election
 export const startElection = async () => {
   try {
-    await axios.post('http://localhost:5000/api/timer/start-election')
+    await axios.post(`${apiUrl}/api/timer/start-election`)
     message.value = 'Election started successfully.'
     fetchTimerStatus()
   } catch (error) {
@@ -80,7 +81,7 @@ export const startElection = async () => {
 // Stop Election
 export const stopElection = async () => {
   try {
-    await axios.post('http://localhost:5000/api/timer/stop-election')
+    await axios.post(`${apiUrl}/api/timer/stop-election`)
     message.value = 'Election stopped successfully.'
     fetchTimerStatus()
   } catch (error) {
