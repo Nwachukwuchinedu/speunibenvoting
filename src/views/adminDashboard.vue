@@ -256,14 +256,16 @@ const selectedLevel = ref('none') // For level filter
 const filteredUsers = computed(() => {
   return allUsersData.value.filter((user) => {
     const matchesSearch =
-      user?.fullname.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      user?.matno.toLowerCase().includes(searchQuery.value.toLowerCase())
+      (user.fullname && user.fullname.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
+      (user.matno && user.matno.toLowerCase().includes(searchQuery.value.toLowerCase()));
 
     const matchesLevel =
-      selectedLevel.value === 'none' || user.level === Number(selectedLevel.value)
-    return matchesSearch && matchesLevel
-  })
-})
+      selectedLevel.value === 'none' || user.level === Number(selectedLevel.value);
+
+    return matchesSearch && matchesLevel;
+  });
+});
+
 
 // Store the fetched data
 const chartData = ref([])
