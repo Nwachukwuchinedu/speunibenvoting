@@ -157,23 +157,23 @@ const ids = ref({
   positionId: null
 })
 
-function openUpdateForm(candidateId, positionId) {
-  // Find the candidate and position to fill the form
-  const position = positions.value.find((pos) => pos.id === positionId)
-  const candidate = position?.candidates.find((cand) => cand.id === candidateId)
+// function openUpdateForm(candidateId, positionId) {
+//   // Find the candidate and position to fill the form
+//   const position = positions.value.find((pos) => pos.id === positionId)
+//   const candidate = position?.candidates.find((cand) => cand.id === candidateId)
 
-  // Set the form values
-  if (candidate) {
-    form.value.candidateName = candidate.name
-    form.value.candidateId = candidate._id
-    form.value.positionId = position._id
-    form.value.positionName = position.name
-    isOverlayVisible.value = true // Show the overlay
+//   // Set the form values
+//   if (candidate) {
+//     form.value.candidateName = candidate.name
+//     form.value.candidateId = candidate._id
+//     form.value.positionId = position._id
+//     form.value.positionName = position.name
+//     isOverlayVisible.value = true // Show the overlay
 
-    ids.value.candidateId = candidate._id
-    ids.value.positionId = position._id
-  }
-}
+//     ids.value.candidateId = candidate._id
+//     ids.value.positionId = position._id
+//   }
+// }
 
 function onFileChange1(event) {
   form.value.file = event.target.files[0]
@@ -453,7 +453,7 @@ onMounted(async () => {
                   :key="candidate.id"
                   class="action-item img"
                 >
-                  <div class="three-dot" @click="openUpdateForm(candidate.id, position.id)">:</div>
+                  <!-- <div class="three-dot" @click="openUpdateForm(candidate.id, position.id)">:</div> -->
                   <div class="img">
                     <img :src="`${apiUrl}/${candidate.picture}`" :alt="candidate.name" />
                   </div>
@@ -522,7 +522,7 @@ onMounted(async () => {
                       <th>MAT NO</th>
                       <th>LEVEL</th>
                       <th>VOTED</th>
-                      <th>INVALID</th>
+                      <!-- <th>INVALID</th> -->
                     </tr>
                   </thead>
                   <tbody>
@@ -531,9 +531,9 @@ onMounted(async () => {
                       <td>{{ user.matno }}</td>
                       <td>{{ user.level }}</td>
                       <td>{{ user.voted ? 'True' : 'False' }}</td>
-                      <td>
+                      <!-- <td>
                         <form><input type="checkbox" name="invalid" /></form>
-                      </td>
+                      </td> -->
                     </tr>
                   </tbody>
                 </table>
@@ -784,7 +784,8 @@ onMounted(async () => {
 }
 
 .table-container {
-  overflow-x: auto;
+  overflow: auto;
+  height: 400px;
 }
 
 table {
