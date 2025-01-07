@@ -130,7 +130,7 @@ const addCandidate = async () => {
 
     formData.append('picture', picture.value)
 
-    const response = await axios.post(`${apiUrl}0/api/position/add`, formData, {
+    const response = await axios.post(`${apiUrl}/api/position/add`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
