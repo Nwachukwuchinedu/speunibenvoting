@@ -28,7 +28,6 @@ const timerItems = countdownItems()
 const countdown = timerItems.countdown
 const timer = timerItems.timer
 
-console.log(timerItems)
 
 onMounted(fetchTimerStatus)
 
@@ -158,6 +157,7 @@ const submitVote = async () => {
 const confirmVote = (confirm) => {
   if (confirm) {
     submitVote() // Proceed with submitting the vote
+    router.push('/dashboard')
   } else {
     showOverlay.value = false // Close the overlay without submitting
   }
