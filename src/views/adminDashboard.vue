@@ -1,7 +1,7 @@
 <script setup>
 // import NavBar from '@/components/NavBar.vue'
 import { getAdminData, fetchAllPositions, fetchAllUsers } from '@/axios/user'
-import { onMounted, ref, computed, watch, nextTick } from 'vue'
+import { onMounted, ref, computed, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -67,7 +67,6 @@ onMounted(async () => {
   }
 })
 
-const baseURL = 'http://localhost:5173'
 
 // Computed property to update only the filePath
 const updatedPositions = computed(() =>
@@ -76,26 +75,21 @@ const updatedPositions = computed(() =>
     candidates: position.candidates.map((candidate) => ({
       ...candidate,
       filePath: candidate.picture
-        ? candidate.picture
-            .replace(
-              'C:\\Users\\Simeon\\OneDrive\\Documents\\coding\\speunibenvoting\\public',
-              baseURL
-            )
-            .replace(/\\/g, '/')
+        ? candidate.picture.replace(/\\/g, '/')
         : '' // Use an empty string or provide a default value
     }))
   }))
 )
 
 // Watch updatedPositions for changes and log it
-watch(
-  updatedPositions,
-  (newVal) => {
+//watch(
+ // updatedPositions,
+  //(newVal) => {
     // console.log('Updated positions:', newVal)
-    return newVal
-  },
-  { deep: true }
-)
+   // return newVal
+  //},
+  //{ deep: true }
+//)
 
 // const sendVerificationEmail = async()=>{
 //   try{
@@ -112,41 +106,41 @@ function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
 }
 
-const name = ref('')
-const candidate = ref('')
-const picture = ref(null)
+// const name = ref('')
+// const candidate = ref('')
+// const picture = ref(null)
 
-const showForm = ref(false) // Toggle state for the form
+// const showForm = ref(false) // Toggle state for the form
 
-const toggleForm = () => {
-  showForm.value = !showForm.value // Toggle visibility
-}
+// const toggleForm = () => {
+//   showForm.value = !showForm.value // Toggle visibility
+// }
 
-const onFileChange = (event) => {
-  picture.value = event.target.files[0]
-}
+// const onFileChange = (event) => {
+//   picture.value = event.target.files[0]
+// }
 
-const addCandidate = async () => {
-  try {
-    const formData = new FormData()
-    formData.append('name', name.value)
+// const addCandidate = async () => {
+//   try {
+//     const formData = new FormData()
+//     formData.append('name', name.value)
 
-    // Automatically format the single candidate input as JSON array
-    formData.append('candidates', JSON.stringify([{ name: candidate.value }]))
+//     // Automatically format the single candidate input as JSON array
+//     formData.append('candidates', JSON.stringify([{ name: candidate.value }]))
 
-    formData.append('picture', picture.value)
+//     formData.append('picture', picture.value)
 
-    const response = await axios.post(`${apiUrl}/api/position/add`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+//     const response = await axios.post(`http://localhost:5000/api/position/add`, formData, {
+//       headers: {
+//         'Content-Type': 'multipart/form-data'
+//       }
+//     })
 
-    console.log('Response:', response.data)
-  } catch (error) {
-    console.error('Error adding position:', error.response ? error.response.data : error.message)
-  }
-}
+//     console.log('Response:', response.data)
+//   } catch (error) {
+//     console.error('Error adding position:', error.response ? error.response.data : error.message)
+//   }
+// }
 
 const isOverlayVisible = ref(false)
 // Form state
@@ -208,7 +202,7 @@ async function updateCandidate() {
 
   try {
     const response = await axios.put(
-      `${apiUrl}0/api/position/${positionId}/candidate/${candidateId}/update`,
+      `${apiUrl}/api/position/${positionId}/candidate/${candidateId}/update`,
       formData,
       {
         headers: {
@@ -443,7 +437,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="action-wrap">
+        <!-- <div class="action-wrap">
           <h2 class="action-title">Upload Candidates</h2>
           <div class="action">
             <div class="action-item">
@@ -474,12 +468,12 @@ onMounted(async () => {
               </transition>
             </div>
           </div>
-        </div>
+        </div> -->
         <div class="action-wrap" id="candidates">
           <h2 class="action-title">Manage Candidates</h2>
           <div>
             <div class="action candidate-action">
-              <div v-for="position in positions" :key="position.id" class="action-content">
+              <div v-for="position in updatedPositions" :key="position.id" class="action-content">
                 <div
                   v-for="candidate in position.candidates"
                   :key="candidate.id"
