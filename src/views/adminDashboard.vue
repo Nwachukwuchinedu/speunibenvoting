@@ -18,8 +18,7 @@ const router = useRouter()
 const userData = ref(null)
 const positions = ref([])
 const allUsersData = ref([])
-const apiUrl = import.meta.env.VITE_API_URL;
-
+const apiUrl = import.meta.env.VITE_API_URL
 
 const timerItems = countdownItems()
 const countdown = timerItems.countdown
@@ -51,11 +50,18 @@ onMounted(async () => {
 //   if (!str) return ''
 //   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 // }
-
+const totalCandidates = ref(0)
 // Fetch all positions
 onMounted(async () => {
   try {
     positions.value = await fetchAllPositions()
+    if (positions.value && Array.isArray(positions.value)) {
+      totalCandidates.value = positions.value.reduce((sum, position) => {
+        return sum + (position.candidates?.length || 0)
+      }, 0)
+    } else {
+      console.error('Unexpected response format')
+    }
   } catch (error) {
     console.error('Failed to load positions:', error)
   }
@@ -257,24 +263,30 @@ const filteredUsers = computed(() => {
   return allUsersData.value.filter((user) => {
     const matchesSearch =
       (user.fullname && user.fullname.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
-      (user.matno && user.matno.toLowerCase().includes(searchQuery.value.toLowerCase()));
+      (user.matno && user.matno.toLowerCase().includes(searchQuery.value.toLowerCase()))
 
     const matchesLevel =
-      selectedLevel.value === 'none' || user.level === Number(selectedLevel.value);
+      selectedLevel.value === 'none' || user.level === Number(selectedLevel.value)
 
-    return matchesSearch && matchesLevel;
-  });
-});
-
+    return matchesSearch && matchesLevel
+  })
+})
 
 // Store the fetched data
 const chartData = ref([])
+const totalVotes = ref(0)
 
 // Fetch data from API endpoint
 onMounted(async () => {
   try {
     const response = await axios.get(`${apiUrl}/api/vote/result`)
     const apiData = response.data
+
+    totalVotes.value = response.data.reduce((sum, position) => {
+      return (
+        sum + position.results.reduce((positionSum, candidate) => positionSum + candidate.votes, 0)
+      )
+    }, 0)
 
     // Transform the API data for Chart.js
     chartData.value = apiData.map((item) => ({
@@ -358,20 +370,40 @@ onMounted(async () => {
     <div class="offcanvas" :class="{ open: isMenuOpen }">
       <button class="close-btn" @click="toggleMenu">&times;</button>
       <ul class="menu-list">
-        <li><a href="#">Dashboard</a></li>
-        <li><a href="#">Voters</a></li>
-        <li><a href="#">Candidates</a></li>
-        <li><a href="#">Results</a></li>
-        <li><a href="#">System Logs</a></li>
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#voters">Voters</a></li>
+        <li><a href="#candidates">Candidates</a></li>
+        <li><a href="#results">Results</a></li>
       </ul>
     </div>
 
     <!-- Main Content -->
-    <main class="content">
+    <main class="content" id="dashboard">
       <h2 v-if="userData && userData.nickname" class="greetings">
         Welcome, {{ userData.nickname }}!
       </h2>
       <div class="actions">
+        <div class="action-wrap">
+          <h2 class="action-title">Election Statistics</h2>
+          <div class="action">
+            <div v-if="allUsersData" class="action-item">
+              <h3>Total Voters</h3>
+              <p>Total voters registered</p>
+              <p class="total" style="color: green">{{ allUsersData.length }}</p>
+            </div>
+            <div class="action-item">
+              <h3>Total Candidates</h3>
+              <p>Total candidates registered</p>
+              <p class="total">{{ totalCandidates }}</p>
+            </div>
+            <div class="action-item">
+              <h3>Total Votes</h3>
+              <p>Total votes casted</p>
+              <p class="total" style="color: brown">{{ totalVotes }}</p>
+            </div>
+          </div>
+        </div>
+
         <div class="action-wrap">
           <h2 class="action-title">Timer</h2>
           <div class="action">
@@ -443,7 +475,7 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        <div class="action-wrap">
+        <div class="action-wrap" id="candidates">
           <h2 class="action-title">Manage Candidates</h2>
           <div>
             <div class="action candidate-action">
@@ -492,7 +524,7 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        <div class="action-wrap">
+        <div class="action-wrap" id="voters">
           <h2 class="action-title">Manage Voters</h2>
           <div class="action">
             <div class="action-item">
@@ -541,7 +573,7 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        <div class="action-wrap">
+        <div class="action-wrap" id="results">
           <h2 class="action-title">Live Results</h2>
           <div class="action">
             <!-- Conditional rendering for when chartData is empty -->
@@ -616,15 +648,16 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #000;
-  color: white;
+  background-color: #fff;
+  color: #000;
   padding: 1rem;
+  box-shadow: var(--sdw-1);
 }
 .menu-btn {
   font-size: 1.5rem;
   background: none;
   border: none;
-  color: white;
+  color: #000;
   cursor: pointer;
 }
 .brand {
@@ -637,6 +670,7 @@ onMounted(async () => {
 .offcanvas {
   position: fixed;
   top: 0;
+  z-index: 10;
   left: -250px;
   width: 250px;
   height: 100%;
@@ -668,6 +702,7 @@ onMounted(async () => {
   color: white;
   text-decoration: none;
   font-size: 1.2rem;
+  font-family: "Poppins", sans-serif;
 }
 .menu-list a:hover {
   text-decoration: underline;
@@ -970,5 +1005,9 @@ button {
 
 .custom-select option:hover {
   background-color: #f0f0f0; /* Highlight hovered option */
+}
+.total {
+  font-family: 'Poppins';
+  font-size: 40px;
 }
 </style>
