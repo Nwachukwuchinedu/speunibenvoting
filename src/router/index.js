@@ -17,31 +17,31 @@ const router = createRouter({
       name: 'landingpage',
       component: landingPage
     },
-    {
-      path: '/register',
-      name: 'Register',
-      component: registerPage
-    },
+    // {
+    //   path: '/register',
+    //   name: 'Register',
+    //   component: registerPage
+    // },
     {
       path: '/login',
       name: 'Login',
       component: loginPage
     },
-    {
-      path: '/forgot-password',
-      name: 'Forgot-Password',
-      component: ForgotPassword
-    },
-    {
-      path: '/reset-password',
-      name: 'Reset-Password',
-      component: ResetPassword
-    },
-    {
-      path: '/verify-email',
-      name: 'Verify-Account',
-      component: VerifyAccount
-    },
+    // {
+    //   path: '/forgot-password',
+    //   name: 'Forgot-Password',
+    //   component: ForgotPassword
+    // },
+    // {
+    //   path: '/reset-password',
+    //   name: 'Reset-Password',
+    //   component: ResetPassword
+    // },
+    // {
+    //   path: '/verify-email',
+    //   name: 'Verify-Account',
+    //   component: VerifyAccount
+    // },
     {
       path: '/dashboard',
       name: 'Dashboard',

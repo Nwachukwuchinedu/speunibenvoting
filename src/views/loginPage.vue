@@ -84,9 +84,9 @@ const submitForm = async () => {
           <span v-if="loading" class="spinner"></span>
           <span v-else>Log In</span>
         </button>
-        <small class="no-account"
+        <!-- <small class="no-account"
           >Don't have an account?<router-link to="/register">SignUp</router-link></small
-        >
+        > -->
       </form>
     </div>
   </div>

@@ -34,7 +34,7 @@ import NavBar from '@/components/NavBar.vue'
         Let's make voting and elections easy for you. This is designed to ensure a secured voting
         session
       </p>
-      <router-link to="/register" class="btn-link" v-auto-animate>Register as a Voter</router-link>
+      <router-link to="/login" class="btn-link" v-auto-animate>Register as a Voter</router-link>
     </div>
     <img src="../img/undraw_add_user_re_5oib.svg" />
   </div>
