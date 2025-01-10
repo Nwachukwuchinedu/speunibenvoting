@@ -2,6 +2,9 @@
 import NavBar from '@/components/NavBar.vue'
 import axios from 'axios'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // const eyeSlash = document.getElementById('eyeSlash')
 const eyeIcon = ref('fa-solid fa-eye-slash')
@@ -28,27 +31,30 @@ const formData = ref({
   password: ''
 })
 
-const errorMessage = ref("")
+const errorMessage = ref('')
 const loading = ref(false) // Track loading state
 
 const submitForm = async () => {
   loading.value = true // Start loading
 
   try {
-    const response = await axios.post('https://speunibenvotingapi.onrender.com/api/admin/signup', formData.value)
+    const response = await axios.post(
+      'https://speunibenvotingapi.onrender.com/api/admin/signup',
+      formData.value
+    )
     console.log(response.data)
+    router.push('/admin-dashboard')
   } catch (error) {
-        console.log(error);
+    console.log(error)
 
     // Capture and display API errors
     if (error.response.status === 400) {
       errorMessage.value = error.response.data.message
-      console.log(errorMessage.value);
-      
-        
+      console.log(errorMessage.value)
+
       // Automatically clear error messages after 5 seconds
       setTimeout(() => {
-        errorMessage.value = ""
+        errorMessage.value = ''
       }, 5000)
     } else {
       console.error(`Unexpected Error: ${error.message}`)
