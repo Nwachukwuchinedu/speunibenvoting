@@ -427,7 +427,7 @@ onMounted(fetchAdmins);
             <div class="action-item">
               <h3>Total Votes</h3>
               <p>Total votes casted</p>
-              <p class="total" style="color: brown">{{ }}</p>
+              <p class="total" style="color: brown">{{ totalVotes }}</p>
             </div>
           </div>
         </div>
