@@ -33,7 +33,7 @@ const submitForm = async () => {
   loading.value = true // Start loading
   try {
     const response = await axios.post(
-      'https://speunibenvotingapi.onrender.com/api/admin/login',
+      'http://localhost:5000/api/admin/login',
       formData.value
     )
     const token = response.data.token
