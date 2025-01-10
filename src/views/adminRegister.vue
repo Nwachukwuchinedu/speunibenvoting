@@ -43,7 +43,7 @@ const submitForm = async () => {
       formData.value
     )
     console.log(response.data)
-    router.push('/admin-dashboard')
+    router.push('/admin-login')
   } catch (error) {
     console.log(error)
 
