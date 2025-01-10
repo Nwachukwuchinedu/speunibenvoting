@@ -697,6 +697,10 @@ onMounted(fetchAdmins);
   color: #000;
   padding: 1rem;
   box-shadow: var(--sdw-1);
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 10;
 }
 .menu-btn {
   font-size: 1.5rem;
