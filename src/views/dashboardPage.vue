@@ -143,8 +143,8 @@ const submitVote = async () => {
         'Content-Type': 'application/json'
       }
     })
-    console.log(selectedVotes.value)
     console.log('Vote successfully cast:', response.data)
+    alert("You have voted successfully")
   } catch (error) {
     console.error('Error submitting vote:', error)
   }
