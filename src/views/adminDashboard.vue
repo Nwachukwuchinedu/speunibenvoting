@@ -383,6 +383,18 @@ const filteredAdmins = computed(() =>
 
 // Fetch data on component mount
 onMounted(fetchAdmins);
+const totalVotess = ref(0);
+
+const getResult = async () => {
+  try {
+    const response = await axios.get(` http://localhost:5000/api/vote/all`);
+    totalVotess.value = response.data.voterCount;
+  } catch (error) {
+    console.error('Error fetching admins:', error);
+  }
+};
+onMounted(getResult);
+
 </script>
 
 <template>
@@ -427,7 +439,7 @@ onMounted(fetchAdmins);
             <div class="action-item">
               <h3>Total Votes</h3>
               <p>Total votes casted</p>
-              <p class="total" style="color: brown">{{  }}</p>
+              <p class="total" style="color: brown">{{ totalVotess   }}</p>
             </div>
           </div>
         </div>
