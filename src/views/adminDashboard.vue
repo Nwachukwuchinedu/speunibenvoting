@@ -237,7 +237,7 @@ async function deleteCandidate() {
 
   try {
     const response = await axios.delete(
-      `${apiUrl}0/api/position/${positionId}/candidate/${candidateId}/delete`
+      `${apiUrl}/api/position/${positionId}/candidate/${candidateId}/delete`
     )
     console.log('Candidate deleted successfully:', response.data)
   } catch (error) {
