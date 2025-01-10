@@ -68,8 +68,8 @@ const submitForm = async () => {
     <div class="content">
       <small id="error" class="error"></small>
       <div class="title">
-        <h1>Welcome!</h1>
-        <p>Register as a voter on the voting platform to vote in your preferred candidate.</p>
+        <h1>Admin Login</h1>
+        <p>Log in to your admin account to manage and oversee the voting process effectively.</p>
       </div>
       <form @submit.prevent="submitForm">
         <div class="control">
@@ -87,6 +87,9 @@ const submitForm = async () => {
           <span v-if="loading" class="spinner"></span>
           <span v-else>Log In</span>
         </button>
+        <small class="no-account"
+          >Don't have an account?<router-link to="/admin-register">Register</router-link></small
+        >
       </form>
     </div>
   </div>
