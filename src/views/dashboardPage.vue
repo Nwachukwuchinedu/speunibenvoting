@@ -28,7 +28,6 @@ const timerItems = countdownItems()
 const countdown = timerItems.countdown
 const timer = timerItems.timer
 
-
 onMounted(fetchTimerStatus)
 
 onMounted(async () => {
@@ -138,13 +137,20 @@ const submitVote = async () => {
     })
   }
   try {
-    const response = await axios.post('https://speunibenvotingapi.onrender.com/api/vote/cast', voteData, {
-      headers: {
-        'Content-Type': 'application/json'
+    const response = await axios.post(
+      'https://speunibenvotingapi.onrender.com/api/vote/cast',
+      voteData,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       }
-    })
+    )
     console.log('Vote successfully cast:', response.data)
-    alert("You have voted successfully")
+    setTimeout(() => {
+      window.location.reload()
+    }, 2000)
+    alert('You have voted successfully')
   } catch (error) {
     console.error('Error submitting vote:', error)
   }
@@ -271,8 +277,10 @@ const sendVerificationEmail = async () => {
           </div>
         </div>
 
-       <!-- Final Vote Submission -->
-        <button type="submit" :class="{'disabled-button': hasVotedData?.hasVoted}">Submit Vote</button>
+        <!-- Final Vote Submission -->
+        <button type="submit" :class="{ 'disabled-button': hasVotedData?.hasVoted }">
+          Submit Vote
+        </button>
       </form>
 
       <!-- Overlay for confirmation -->
