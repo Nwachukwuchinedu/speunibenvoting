@@ -272,7 +272,7 @@ const sendVerificationEmail = async () => {
         </div>
 
        <!-- Final Vote Submission -->
-        <button type="submit">Submit Vote</button>
+        <button type="submit" :class="{'disabled-button': hasVotedData?.hasVoted}">Submit Vote</button>
       </form>
 
       <!-- Overlay for confirmation -->
