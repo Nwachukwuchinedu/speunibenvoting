@@ -387,7 +387,7 @@ const totalVotess = ref(0);
 
 const getResult = async () => {
   try {
-    const response = await axios.get(` http://localhost:5000/api/vote/all`);
+    const response = await axios.get(`https://speunibenvotingapi.onrender.com/api/vote/all`);
     totalVotess.value = response.data.voterCount;
   } catch (error) {
     console.error('Error fetching admins:', error);
