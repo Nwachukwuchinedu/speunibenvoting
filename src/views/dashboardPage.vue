@@ -250,7 +250,7 @@ const sendVerificationEmail = async () => {
                 />
 
                 <!-- Vote Button -->
-                <button v-if="isLoading">
+                <!-- <button v-if="isLoading">
                   <p>Loading...</p>
                 </button>
                 <button
@@ -271,7 +271,7 @@ const sendVerificationEmail = async () => {
                         ? 'Voted'
                         : 'Vote'
                   }}
-                </button>
+                </button> -->
               </div>
             </div>
           </div>
