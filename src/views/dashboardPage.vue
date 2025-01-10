@@ -157,7 +157,7 @@ const submitVote = async () => {
 const confirmVote = (confirm) => {
   if (confirm) {
     submitVote() // Proceed with submitting the vote
-    router.push('/dashboard')
+    window.location.reload()
   } else {
     showOverlay.value = false // Close the overlay without submitting
   }
