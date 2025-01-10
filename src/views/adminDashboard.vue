@@ -278,7 +278,8 @@ onMounted(async () => {
         sum + position.results.reduce((positionSum, candidate) => positionSum + candidate.votes, 0)
       )
     }, 0)
-
+    console.log(apiData)
+    
     // Transform the API data for Chart.js
     chartData.value = apiData.map((item) => ({
       position: item.position,
@@ -361,6 +362,8 @@ onMounted(async () => {
 // }
 
 const admins = ref([]);
+const loading = ref(false);
+const  error = ref(null);
 const filteredEmails = ['chinedusimeon185@gmail.com'];
 
 // Fetch all admins
@@ -424,7 +427,7 @@ onMounted(fetchAdmins);
             <div class="action-item">
               <h3>Total Votes</h3>
               <p>Total votes casted</p>
-              <p class="total" style="color: brown">{{ totalVotes }}</p>
+              <p class="total" style="color: brown">{{ }}</p>
             </div>
           </div>
         </div>
