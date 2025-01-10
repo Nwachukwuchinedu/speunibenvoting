@@ -28,7 +28,7 @@ const formData = ref({
   password: ''
 })
 
-const errorMessage = ref({})
+const errorMessage = ref("")
 const loading = ref(false) // Track loading state
 
 const submitForm = async () => {
