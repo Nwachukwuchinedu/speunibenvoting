@@ -66,7 +66,7 @@ const submitForm = async () => {
       <small id="error" class="error"></small>
       <div class="title">
         <h1>Welcome!</h1>
-        <p>Register as a voter on the voting platform to vote in your preferred candidate.</p>
+        <p>Continue as a voter on the voting platform to vote in your preferred candidate.</p>
       </div>
       <form @submit.prevent="submitForm">
         <div class="control">

@@ -120,12 +120,13 @@ const handleVote = (positionName, candidateId) => {
 
 // Submit vote data
 // Your previous submitVote logic with overlay integration
+
+// Submit vote data
 const submitVote = async () => {
   if (!userData.value) {
     console.error('User not logged in')
     return
   }
-
   // Prepare the vote data
   const voteData = {
     voterId: userData.value.matno, // Use matno as voterId
@@ -136,32 +137,28 @@ const submitVote = async () => {
       }
     })
   }
-
   try {
-    isLoading.value = true
     const response = await axios.post('https://speunibenvotingapi.onrender.com/api/vote/cast', voteData, {
       headers: {
         'Content-Type': 'application/json'
       }
     })
-    showOverlay.value = false // Close the overlay after vote submission
+    console.log(selectedVotes.value)
     console.log('Vote successfully cast:', response.data)
   } catch (error) {
     console.error('Error submitting vote:', error)
-  } finally {
-    isLoading.value = false
   }
 }
 
 // Confirm vote action
-const confirmVote = (confirm) => {
-  if (confirm) {
-    submitVote() // Proceed with submitting the vote
-    window.location.reload()
-  } else {
-    showOverlay.value = false // Close the overlay without submitting
-  }
-}
+// const confirmVote = (confirm) => {
+//   if (confirm) {
+//     submitVote() // Proceed with submitting the vote
+//     window.location.reload()
+//   } else {
+//     showOverlay.value = false // Close the overlay without submitting
+//   }
+// }
 
 const sendVerificationEmail = async () => {
   try {
@@ -274,29 +271,18 @@ const sendVerificationEmail = async () => {
           </div>
         </div>
 
-        <!-- Final Vote Submission -->
-        <button v-if="isLoading" style="padding: 0; background: #fff"></button>
-        <button
-          v-else-if="!isLoading && timer.isActive"
-          type="button"
-          :disabled="hasVotedData?.hasVoted"
-          :class="{
-            'disabled-button': hasVotedData?.hasVoted
-          }"
-          @click="showOverlay = true"
-        >
-          {{ hasVotedData?.hasVoted ? 'Voted' : 'SubmitVote' }}
-        </button>
+       <!-- Final Vote Submission -->
+        <button type="submit">Submit Vote</button>
       </form>
 
       <!-- Overlay for confirmation -->
-      <div v-if="showOverlay" class="overlay">
+      <!-- <div v-if="showOverlay" class="overlay">
         <div class="overlay-content">
           <h2>Do you want to cast your vote?</h2>
           <button @click="confirmVote(true)" class="yes">Yes</button>
           <button @click="confirmVote(false)" class="no">No</button>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
