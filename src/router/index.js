@@ -1,13 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import landingPage from '../views/landingPage.vue'
-import registerPage from '../views/registerPage.vue'
+// import registerPage from '../views/registerPage.vue'
 import loginPage from '../views/loginPage.vue'
-import ResetPassword from '@/views/resetPassword.vue'
-import ForgotPassword from '@/views/forgotPassword.vue'
-import VerifyAccount from '@/views/verifyAccount.vue'
+// import ResetPassword from '@/views/resetPassword.vue'
+// import ForgotPassword from '@/views/forgotPassword.vue'
+// import VerifyAccount from '@/views/verifyAccount.vue'
 import DashboardPage from '@/views/dashboardPage.vue'
 import AdminLogin from '@/views/adminLogin.vue'
+import AdminRegister from '@/views/adminRegister.vue'
 import AdminDashboard from '@/views/adminDashboard.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,6 +53,11 @@ const router = createRouter({
       path: '/admin-login',
       name: 'Admin Login',
       component: AdminLogin
+    },
+    {
+      path: '/admin-register',
+      name: 'Admin Register',
+      component: AdminRegister
     },
     {
       path: '/admin-dashboard',

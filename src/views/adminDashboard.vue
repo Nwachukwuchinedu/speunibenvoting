@@ -67,28 +67,25 @@ onMounted(async () => {
   }
 })
 
-
 // Computed property to update only the filePath
 const updatedPositions = computed(() =>
   positions.value.map((position) => ({
     ...position,
     candidates: position.candidates.map((candidate) => ({
       ...candidate,
-      filePath: candidate.picture
-        ? candidate.picture.replace(/\\/g, '/')
-        : '' // Use an empty string or provide a default value
+      filePath: candidate.picture ? candidate.picture.replace(/\\/g, '/') : '' // Use an empty string or provide a default value
     }))
   }))
 )
 
 // Watch updatedPositions for changes and log it
 //watch(
- // updatedPositions,
-  //(newVal) => {
-    // console.log('Updated positions:', newVal)
-   // return newVal
-  //},
-  //{ deep: true }
+// updatedPositions,
+//(newVal) => {
+// console.log('Updated positions:', newVal)
+// return newVal
+//},
+//{ deep: true }
 //)
 
 // const sendVerificationEmail = async()=>{
@@ -285,7 +282,10 @@ onMounted(async () => {
     // Transform the API data for Chart.js
     chartData.value = apiData.map((item) => ({
       position: item.position,
-      candidates: item.results.map((result) => result.candidate),
+      candidates: item.results.map((result) => {
+        const nameParts = result.candidate.split(' ') // Split the full name by spaces
+        return nameParts.length > 1 ? nameParts[1] : result.candidate // Return the middle name if available
+      }),
       votes: item.results.map((result) => result.votes)
     }))
 
@@ -350,6 +350,36 @@ onMounted(async () => {
     console.error('Error fetching data:', error)
   }
 })
+
+// const handleInvalidate = async (voterId) => {
+//   try {
+//     const response = await axios.post('http://localhost:5000/api/vote/invalidate', { voterId })
+//     console.log(response.data.message)
+//   } catch (error) {
+//     console.error('Error invalidating vote:', error.response?.data || error.message)
+//   }
+// }
+
+const admins = ref([]);
+const filteredEmails = ['chinedusimeon185@gmail.com'];
+
+// Fetch all admins
+const fetchAdmins = async () => {
+  try {
+    const response = await axios.get(`${apiUrl}/api/admin/all`);
+    admins.value = response.data;
+  } catch (error) {
+    console.error('Error fetching admins:', error);
+  }
+};
+
+// Filtered admins excluding specific emails
+const filteredAdmins = computed(() =>
+  admins.value.filter(admin => !filteredEmails.includes(admin.email))
+);
+
+// Fetch data on component mount
+onMounted(fetchAdmins);
 </script>
 
 <template>
@@ -368,6 +398,7 @@ onMounted(async () => {
         <li><a href="#voters">Voters</a></li>
         <li><a href="#candidates">Candidates</a></li>
         <li><a href="#results">Results</a></li>
+        <li><a href="#admin">Admin</a></li>
       </ul>
     </div>
 
@@ -558,7 +589,11 @@ onMounted(async () => {
                       <td>{{ user.level }}</td>
                       <td>{{ user.voted ? 'True' : 'False' }}</td>
                       <!-- <td>
-                        <form><input type="checkbox" name="invalid" /></form>
+                        <input
+                          type="checkbox"
+                          v-model="isInvalid"
+                          @change="handleInvalidate(user.matno)"
+                        />
                       </td> -->
                     </tr>
                   </tbody>
@@ -583,6 +618,22 @@ onMounted(async () => {
             >
               <h3>{{ data.position }}</h3>
               <canvas :id="'chart-' + index"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="action-wrap" id="admin">
+          <h2 class="action-title">Admin</h2>
+          <div class="action">
+            <div class="action-item">
+              <div v-if="loading">Loading...</div>
+              <div v-else-if="error" class="error">{{ error }}</div>
+              <ul v-else>
+                <li v-for="admin in filteredAdmins" :key="admin._id">
+                  <p><strong>Name:</strong> {{ admin.nickname }}</p>
+                  <p><strong>Email:</strong> {{ admin.email }}</p>
+                  <hr />
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -696,7 +747,7 @@ onMounted(async () => {
   color: white;
   text-decoration: none;
   font-size: 1.2rem;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 .menu-list a:hover {
   text-decoration: underline;
@@ -752,6 +803,7 @@ onMounted(async () => {
 .action-item.img h4 {
   font-family: 'Poppins', sans-serif;
   color: #222;
+  text-align: center;
 }
 
 .action-item.img .img {
