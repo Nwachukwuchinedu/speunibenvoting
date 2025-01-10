@@ -139,7 +139,7 @@ const submitVote = async () => {
 
   try {
     isLoading.value = true
-    const response = await axios.post('http://localhost:5000/api/vote/cast', voteData, {
+    const response = await axios.post('https://speunibenvotingapi.onrender.com/api/vote/cast', voteData, {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -157,6 +157,7 @@ const submitVote = async () => {
 const confirmVote = (confirm) => {
   if (confirm) {
     submitVote() // Proceed with submitting the vote
+    window.location.reload()
   } else {
     showOverlay.value = false // Close the overlay without submitting
   }
